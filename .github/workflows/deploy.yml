@@ -17,9 +17,9 @@ jobs:
 
       - name: Deploy to `gh-pages`
         run: |
-        git checkout gh-pages
-        git add .
-        git commit -am "auto deploy"
-        git push origin gh-pages
+          git checkout gh-pages
+          git add .
+          git commit -am "auto deploy"
+          git push origin gh-pages
 
       
