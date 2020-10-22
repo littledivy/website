@@ -1,3 +1,4 @@
 #!/bin/bash
 
-miniserve ./static --index index.html
+python -m SimpleHTTPServer 8000
+
