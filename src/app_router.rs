@@ -2,7 +2,7 @@ use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-use crate::data::{AppRoute, EXPERIENCE_LIST, PROJECT_LIST};
+use crate::data::AppRoute;
 use crate::pages;
 
 #[wasm_bindgen]
@@ -34,18 +34,6 @@ impl Component for AppRouter {
             },
             AppRoute::Home => html! {
                 <pages::Home/>
-            },
-            AppRoute::Experiences => html! {
-                <pages::ExperienceList list={&EXPERIENCE_LIST}/>
-            },
-            AppRoute::Experience(id) => html! {
-                <pages::ExperienceDetails experience={&EXPERIENCE_LIST[id]}/>
-            },
-            AppRoute::Projects => html! {
-                <pages::ProjectsList list={&PROJECT_LIST}/>
-            },
-            AppRoute::Project(id) => html! {
-                <pages::ProjectDetails project={&PROJECT_LIST[id]}/>
             },
         });
 

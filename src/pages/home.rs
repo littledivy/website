@@ -1,7 +1,6 @@
 use yew::prelude::*;
 
-use crate::components::SocialLinks;
-use crate::data::{AppRoute, AppRouteAnchor, HEADER_LINKS, LOGO_NAME};
+use crate::data::{AppRoute, AppRouteAnchor,LOGO_NAME};
 
 pub struct Home;
 
@@ -21,18 +20,6 @@ impl Component for Home {
     }
 
     fn view(&self) -> Html {
-        let header_links = HEADER_LINKS
-            .iter()
-            .map(|v| {
-                html! {
-                    <li><div class="home-link">
-                        <AppRouteAnchor route={v.route.clone()}>
-                            {v.name}
-                        </AppRouteAnchor>
-                    </div></li>
-                }
-            })
-            .collect::<Html>();
         html! {
         <div class="home-content">
             <div class="home-content-section">
@@ -40,13 +27,6 @@ impl Component for Home {
                 class="home-profile"
                 alt="profile"
                 src="https://raw.githubusercontent.com/kamiyaa/kamiyaa.github.io/master/img/profile.jpg"/>
-            </div>
-            <div class="home-content-section">
-                <AppRouteAnchor classes="home-logo-link" route={AppRoute::Index}>{LOGO_NAME}</AppRouteAnchor>
-                <br/>
-                <SocialLinks/>
-                <ul>{header_links}</ul>
-                {about_content()}
             </div>
         </div>
                 }

@@ -1,8 +1,6 @@
 use web_sys::{ScrollBehavior, ScrollToOptions};
 use yew::prelude::*;
 
-use crate::components::{Footer, Header};
-
 #[derive(Clone, Debug, Properties)]
 pub struct Props {
     pub children: Children,
@@ -39,11 +37,7 @@ impl Component for PageTemplate {
         }
         html! {
         <div>
-        <Header/>
-        <div>
             { self.props.children.clone() }
-        </div>
-        <Footer/>
         </div>
                 }
     }
