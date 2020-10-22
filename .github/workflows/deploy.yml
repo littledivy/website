@@ -12,6 +12,7 @@ jobs:
       - name: Install and Build 🔧
         run: |
            sudo npm i -g wasm-pack
+           sudo apt install sassc
            ./build.sh
 
       - name: Deploy 🚀
