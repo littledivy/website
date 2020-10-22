@@ -11,7 +11,7 @@ jobs:
 
       - name: Install and Build 🔧
         run: |
-           npm i -g wasm-pack
+           sudo npm i -g wasm-pack
            ./build.sh
 
       - name: Deploy 🚀
