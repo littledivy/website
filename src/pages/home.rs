@@ -21,32 +21,47 @@ impl Component for Home {
 
     fn view(&self) -> Html {
         html! {
-        <div class="home-content">
-            <div class="home-content-section">
-            <img
-                class="home-profile"
-                alt="profile"
-                src="https://raw.githubusercontent.com/kamiyaa/kamiyaa.github.io/master/img/profile.jpg"/>
+            <main>
+            <div class="intro">
+              <ul class="c-rainbow">
+                <li class="c-rainbow__layer c-rainbow__layer--white">{"DIVY"}</li>
+                <li class="c-rainbow__layer c-rainbow__layer--orange">{"DIVY"}</li>
+                <li class="c-rainbow__layer c-rainbow__layer--red">{"DIVY"}</li>
+                <li class="c-rainbow__layer c-rainbow__layer--violet">{"DIVY"}</li>
+                <li class="c-rainbow__layer c-rainbow__layer--blue">{"DIVY"}</li>
+                <li class="c-rainbow__layer c-rainbow__layer--green">{"DIVY"}</li>
+                <li class="c-rainbow__layer c-rainbow__layer--yellow">{"DIVY"}</li>
+              </ul>
             </div>
-        </div>
+            <div class="tagline">
+              {"All-Star Dev | Code Fanatic | Open sourcer | Bruh"}
+            </div>
+            <div class="icons-social">
+              <a target="_blank" href="https://github.com/divy-work"
+                ><i class="fab fa-github"></i
+              ></a>
+              <a target="_blank" href="https://twitter.com/undefined_void"
+                ><i class="fab fa-twitter"></i
+              ></a>
+              <a target="_blank" href="https://stackoverflow.com/story/undefined_void"
+                ><i class="fab fa-stack-overflow"></i
+              ></a>
+              <a target="_blank" href="https://medium.com/@dj.srivastava23"
+                ><i class="fab fa-medium"></i
+              ></a>
+              <a target="_blank" href="https://instagram.com/divy.exe"
+                ><i class="fab fa-instagram"></i
+              ></a>
+            </div>
+          </main>
                 }
     }
 }
 
 fn about_content() -> Html {
     html! {
-    <div>
-        <p>{ "Hi, my name is Jiayi Zhao (" }<b>{ "Jeff" }</b>{ ")." }
-        <br/>
-        { "I'm currently a 4th year student studying Computer Science at the "}<b>{ "University of Toronto" }</b>{ "." }
-        <br/>
-        { "I enjoy working with open source software, learning new technologies" }
-        <br/>
-        { "and coming up with innovative ways to solve problems." }
-        <br/>
-        </p>
-        <p>{ "Feel free to look around!" }
-        </p>
+    <div class="tagline">
+      {"All-Star Dev | Code Fanatic | Open sourcer | Bruh"}
     </div>
-        }
+    }
 }
