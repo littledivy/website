@@ -1,0 +1,2 @@
+# ignore the bundled site source
+*.js linguist-vendored

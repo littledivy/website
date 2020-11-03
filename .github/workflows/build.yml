@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build
 on: [push]
 jobs:
   build-and-deploy:
@@ -15,13 +15,5 @@ jobs:
            sudo apt install sassc
            ./build.sh
 
-      - name: Deploy to `gh-pages`
-        run: |
-          git checkout -b gh-pages
-          git config --global user.email "littledivy@users.noreply.github.com"
-          git config --global user.name "littledivy"
-          git add .
-          git commit -am "auto deploy"
-          git push origin gh-pages
 
       

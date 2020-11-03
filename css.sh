@@ -3,7 +3,7 @@
 date
 echo '=========='
 
-CSS_DIR=./static/css
+CSS_DIR=./docs/css
 SASS_DIR=./scss
 
 mkdir -p "$CSS_DIR"
