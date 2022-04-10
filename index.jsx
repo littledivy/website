@@ -13,9 +13,9 @@ export function Header() {
 }
 
 // Pre-render the HTML
-const html = marked.parse(emojify(Deno.readTextFileSync("index.md")));
-const mdCss = Deno.readTextFileSync("md.css");
-const mdCssOverrides = Deno.readTextFileSync("overrides.css");
+const html = marked.parse(emojify(await Deno.readTextFile("index.md")));
+const mdCss = await Deno.readTextFile("md.css");
+const mdCssOverrides = await Deno.readTextFile("overrides.css");
 
 export function Index() {
   return (
