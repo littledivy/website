@@ -13,6 +13,7 @@ animes i like
 - spy x family
 - love, chunibyo & other delusions
 - kaguya sama: love is war
+- shikimori's not just a cutie
 
 ~
 
