@@ -5,7 +5,7 @@ export function Header() {
   return (
     <div class="flex items-start mt-4">
       <div class="md:ml-4 md:pt-8 sm:pt-2 md:pb-8 md:pl-6">
-        <p class="text-3xl">divy.works</p>
+        <p class="text-3xl">divy.work</p>
         <small>(ik cringe domain name)</small>
       </div>
     </div>
