@@ -3,7 +3,7 @@ work @ [deno](https://deno.land) :sauropod: i also maintain some
 [nice](https://github.com/littledivy) open source projects. i mostly do rust,
 deno and zig.
 
-reach out: hello@divy.works OR twitter:
+reach out: hello@divy.work OR twitter:
 [@undefined_void](https://twitter.com/undefined_void)
 
 ~
