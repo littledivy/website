@@ -28,8 +28,8 @@ const htmlTag = ({ body, head, footer, styleTag }) => (`
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Elsa - a JS runtime</title>
-    <meta name="description" content="Elsa is a JavaScript runtime. Hightly configurable, built for speed and to be embeddable.">
+    <title>divy</title>
+    <meta name="description" content="Hi, I am Divy. Open source developer.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     ${head}
     ${styleTag}
