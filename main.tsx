@@ -57,11 +57,40 @@ function IconGreenCheck() {
   );
 }
 
+function BulletIcon() {
+  return (
+    <div class={tw`flex-shrink-0`}>
+      <svg
+        class={tw`h-6 w-6 text-gray-400`}
+        x-description="Heroicon name: solid/document"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+        />
+      </svg>
+    </div>
+  );
+}
+
 const features = [
-  [
-    () => <IconGreenCheck />,
-    "Extensive contributions to the Deno CLI; most notably around performance, FFI and cryptography.",
-  ],
+  // [
+  //   () => <BulletIcon />,
+  //   "Efficient URL serialization",
+  //   "https://littledivy.notion.site/Efficient-URL-serialization-fa0f74f9611645298a41fc080b506a13"
+  // ],
+  // [
+  //   () => <BulletIcon />,
+  //   "weak_linking in macOS",
+  //   "#"
+  // ],
 ];
 
 function Home() {
@@ -128,23 +157,6 @@ function Home() {
         <GitHub class={tw`absolute top-0 right-0 mt-4 mr-4`} />
       </div>
 
-      {
-        /* Features list
-      <div class={tw`mt-8 max-w-3xl mx-auto`}>
-        <h2 class={tw`text-2xl font-bold`}></h2>
-        <ul class={tw`mt-4 space-y-4`}>
-          {features.map(([icon, description]) => (
-            <li class={tw`flex`}>
-              {icon()}
-              <p class={tw`ml-3 text-base text-gray-500`}>
-                {description}
-              </p>
-            </li>
-          ))}
-        </ul>
-        </div>*/
-      }
-
       <div class={tw`mt-8 max-w-3xl mx-auto`}>
         <div
           class={tw`bg-white overflow-hidden sm:rounded-lg border border-gray-200`}
@@ -177,6 +189,22 @@ leading-6 font-medium text-gray-900`}
           </div>
         </div>
       </div>
+      {features.length > 0 && (
+        <div class={tw`mt-8 max-w-3xl mx-auto`}>
+          <h3 class={tw`text-xl`}>Technical write-ups</h3>
+          
+          <ul class={tw`mt-4 ml-3 space-y-4`}>
+            {features.map(([icon, description, link]) => (
+              <li class={tw`flex`}>
+                {icon()}
+                <a class={tw`ml-3 text-base text-gray-500 text-underline`} href={link} target="_blank">
+                  {description}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </main>
   );
 }
