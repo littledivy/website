@@ -192,12 +192,16 @@ leading-6 font-medium text-gray-900`}
       {features.length > 0 && (
         <div class={tw`mt-8 max-w-3xl mx-auto`}>
           <h3 class={tw`text-xl`}>Technical write-ups</h3>
-          
+
           <ul class={tw`mt-4 ml-3 space-y-4`}>
             {features.map(([icon, description, link]) => (
               <li class={tw`flex`}>
                 {icon()}
-                <a class={tw`ml-3 text-base text-gray-500 text-underline`} href={link} target="_blank">
+                <a
+                  class={tw`ml-3 text-base text-gray-500 text-underline`}
+                  href={link}
+                  target="_blank"
+                >
                   {description}
                 </a>
               </li>
