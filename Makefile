@@ -1,5 +1,5 @@
 start:
-	deno run -A --unstable --watch main.tsx
+	deno run -A --watch main.ts
 
 fmt:
 	deno fmt
