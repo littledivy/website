@@ -14,7 +14,7 @@ build-pages: $(HTMLFiles) $(PDFFiles) ## Build the pages
 
 %.html: typ/%.typ
 	pandoc $< -f typst -t html -o $@ --self-contained --css=tufte.css \
-		--metadata pagetitle="Tufte HTML" \
+		--metadata pagetitle=$(shell basename $< .typ) \
 		-H ./include.html
 
 pdf/%.pdf: $(HTMLFiles)
