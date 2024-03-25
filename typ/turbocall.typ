@@ -4,7 +4,7 @@
 <meta name="date" content="2024-03-25">
 <meta property="og:title" content="Turbocall: the Just-in-time compiler for Deno FFI">
 <meta property="og:description" content="Turbocall: the Just-in-time compiler for Deno FFI">
-<meta property="og:image" content="/assets/turbocall-og.png">
+<meta property="og:image" content="https://divy.work/assets/turbocall-og.png">
 
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 
