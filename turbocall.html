@@ -575,8 +575,8 @@ calls.</p>
 <h3>Enter Deno FFI</h3>
 <div class="sourceCode" id="cb3"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> { symbols } <span class="op">=</span> Deno<span class="op">.</span><span class="fu">dlopen</span>(<span class="st">&quot;libc.6.so&quot;</span><span class="op">,</span> {</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  open<span class="op">:</span> {</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    parameters<span class="op">:</span> [<span class="st">&quot;string&quot;</span><span class="op">,</span> <span class="st">&quot;number&quot;</span>]<span class="op">,</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    result<span class="op">:</span> <span class="st">&quot;number&quot;</span><span class="op">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    parameters<span class="op">:</span> [<span class="st">&quot;buffer&quot;</span><span class="op">,</span> <span class="st">&quot;i32&quot;</span>]<span class="op">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    result<span class="op">:</span> <span class="st">&quot;i32&quot;</span><span class="op">,</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
 <p><code>Deno.dlopen</code> is the API to open a dynamic library. Notice

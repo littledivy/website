@@ -92,8 +92,8 @@ Apart from native runtime bindings, one of the most common places where this opt
 ```typescript
 const { symbols } = Deno.dlopen("libc.6.so", {
   open: {
-    parameters: ["string", "number"],
-    result: "number",
+    parameters: ["buffer", "i32"],
+    result: "i32",
   },
 });
 ```
