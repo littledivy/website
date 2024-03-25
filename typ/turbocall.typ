@@ -1,3 +1,14 @@
+---
+<meta name="description" content="Turbocall: the Just-in-time compiler for Deno FFI">
+<meta name="author" content="Divy Srivastava">
+<meta name="date" content="2024-03-25">
+<meta property="og:title" content="Turbocall: the Just-in-time compiler for Deno FFI">
+<meta property="og:description" content="Turbocall: the Just-in-time compiler for Deno FFI">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+
+<title>Turbocall: the Just-in-time compiler for Deno FFI</title>
+---
+
 = Turbocall: the Just-in-time compiler for Deno FFI
 
 _#datetime(
@@ -149,4 +160,4 @@ a more engine-agnostic design where you could swap out V8 for other engines like
 
 That's it! Feel free to follow me on Twitter: https://twitter.com/littledivy
 
-This document is available as PDF at https://divy.work/pdf/turbocall.pdf
+This document is available as PDF: https://divy.work/pdf/turbocall.pdf
