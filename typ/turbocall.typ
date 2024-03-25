@@ -2,12 +2,21 @@
 <meta name="description" content="Turbocall: the Just-in-time compiler for Deno FFI">
 <meta name="author" content="Divy Srivastava">
 <meta name="date" content="2024-03-25">
+
+<meta property="og:url" content="https://divy.work/turbocall.html">
+<meta property="og:type" content="website">
 <meta property="og:title" content="Turbocall: the Just-in-time compiler for Deno FFI">
 <meta property="og:description" content="Turbocall: the Just-in-time compiler for Deno FFI">
 <meta property="og:image" content="https://divy.work/assets/turbocall-og.png">
 
-<link rel="icon" type="image/x-icon" href="favicon.ico">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="twitter:domain" content="divy.work">
+<meta property="twitter:url" content="https://divy.work/turbocall.html">
+<meta name="twitter:title" content="Turbocall: the Just-in-time compiler for Deno FFI">
+<meta name="twitter:description" content="Turbocall: the Just-in-time compiler for Deno FFI">
+<meta name="twitter:image" content="https://divy.work/assets/turbocall-og.png">
 
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <title>Turbocall: the Just-in-time compiler for Deno FFI</title>
 ---
 
