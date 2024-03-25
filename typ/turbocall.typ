@@ -135,12 +135,12 @@ Slide from the DenoFest talk:
 === Future
 
 It will be interesting to see how Static Hermes#footnote[https://tmikov.blogspot.com/2023/09/how-to-speed-up-micro-benchmark-300x.html] will compare against 
-V8 fast calls. Both can probably generate similar code at rutnime but implemented very differently.
+V8 fast calls. Both can probably generate similar code at runtime but implemented very differently.
 
-I'm also excited about `just-js/lo`#footnote[https://github.com/just-js/lo] which is a WIP low-level JS runtime that aims to 
-aims to generate fast calls bindings ahead-of-time (similar to Deno) but also allow for
+I'm also excited about `just-js/lo`#footnote[https://github.com/just-js/lo] which is a WIP low-level JS runtime that 
+aims to generate V8 fast calls bindings ahead-of-time (similar to Deno) but also allow for
 a more engine-agnostic design where you could swap out V8 for other engines like Hermes, Quickjs.
 
-Feel free to follow me on Twitter: https://twitter.com/littledivy
+That's it! Feel free to follow me on Twitter: https://twitter.com/littledivy
 
 This document is available as PDF at https://divy.work/pdf/turbocall.pdf
