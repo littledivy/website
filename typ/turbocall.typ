@@ -137,7 +137,7 @@ int func_trampoline(void* _this, FastApiTypedArray* buffer, int a, int b) {
 
 Most notably, it generates code to properly pass JS typed arrays and arguments to the native FFI symbol.
 
-I gave a talk on this topic at the DenoFest Meetup in Tokyo #footnote[DenoFest talk https://www.youtube.com/watch?v=3Q1p6J1JY1A]
+I gave a talk on this topic at the DenoFest Meetup in Tokyo #footnote[DenoFest talk https://www.youtube.com/watch?v=ssYN4rFWRIU]
 which goes into more detail about the implementation.
 
 === Benchmarks
