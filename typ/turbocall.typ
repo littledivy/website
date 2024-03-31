@@ -147,7 +147,10 @@ This made FFI calls 100x faster in Deno: https://github.com/denoland/deno/pull/1
 Let's see how this compares against other runtimes.
 
 #figure(
-  image("assets/deno.png")
+  image(
+    "assets/deno.png",
+    alt: "Benchmark comparing Deno, Bun and Node.js on Sqlite and DuckDB",
+  ),
 )
 
 This is running sqlite3 and duckdb benchmarks on Deno, Bun and Node.js. See benchmark source. #footnote[https://github.com/littledivy/blazing-fast-ffi-talk]
@@ -157,7 +160,10 @@ This is running sqlite3 and duckdb benchmarks on Deno, Bun and Node.js. See benc
 Slide from the DenoFest talk:
 
 #figure(
-  image("assets/turbocall-slide.png"),
+  image(
+    "assets/turbocall-slide.png",
+    alt: "Turbocall slide",
+  ),
 )
 
 === Future
