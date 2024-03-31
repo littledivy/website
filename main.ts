@@ -1,4 +1,4 @@
-import { serveDir } from "jsr:@std/http/file_server";
+import { serveDir } from "jsr:@std/http@0.221/file-server";
 
 Deno.serve((req) =>
   serveDir(req, {
