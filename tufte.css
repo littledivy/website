@@ -45,15 +45,15 @@ html {
 }
 
 body {
-    width: 87.5%;
+    width: 47.5%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 12.5%;
+    /* padding-left: 12.5%; */
     font-family: et-book, Palatino, "Palatino Linotype", "Palatino LT STD", "Book Antiqua", Georgia, serif;
-    background-color: #fffff8;
     color: #111;
     max-width: 1400px;
     counter-reset: sidenote-counter;
+    word-wrap: break-word;
 }
 
 /* Adds dark mode */
@@ -124,6 +124,7 @@ article {
 section {
     padding-top: 1rem;
     padding-bottom: 1rem;
+    word-wrap: break-word;
 }
 
 p,
@@ -406,7 +407,7 @@ label.margin-toggle:not(.sidenote-number) {
     height: 100%;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1080px) {
     body {
         width: 84%;
         padding-left: 8%;
