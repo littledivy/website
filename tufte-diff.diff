@@ -1,0 +1,18 @@
+48c48
+<     width: 87.5%;
+---
+>     width: 47.5%;
+51c51
+<     padding-left: 12.5%;
+---
+>     /* padding-left: 12.5%; */
+53d52
+<     background-color: #fffff8;
+56a56
+>     word-wrap: break-word;
+126a127
+>     word-wrap: break-word;
+409c410
+< @media (max-width: 760px) {
+---
+> @media (max-width: 1080px) {
