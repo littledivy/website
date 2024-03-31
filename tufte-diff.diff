@@ -6,13 +6,15 @@
 <     padding-left: 12.5%;
 ---
 >     /* padding-left: 12.5%; */
-53d52
+53c53
 <     background-color: #fffff8;
-56a56
+---
+>     background-color: #ffffff;
+56a57
 >     word-wrap: break-word;
-126a127
+126a128
 >     word-wrap: break-word;
-409c410
+409c411
 < @media (max-width: 760px) {
 ---
 > @media (max-width: 1080px) {
