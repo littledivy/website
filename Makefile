@@ -14,7 +14,7 @@ build-pages: $(HTMLFiles)
   		--user "$(shell id -u):$(shell id -g)" \
 		latexml/ar5ivist:2402.29 \
 		--source=$< \
-		--destination=out/$@
+		--destination=docs/$@
 
 
 dev: ## Rebuild on changes
