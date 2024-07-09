@@ -1,0 +1,391 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>littledivy.com</title>
+</head>
+<style>
+body {
+  background-color: black;
+  background-image: radial-gradient(
+    rgba(100, 100, 100, 0.8), black 120%
+  );
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  padding: 2rem;
+  color: white;
+  font: 1.8rem Inconsolata, monospace;
+  text-shadow: 0 0 5px #C8C8C8;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(black, 0.15),
+      rgba(black, 0.15) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    pointer-events: none;
+  }
+}
+::selection {
+  background: #0080FF;
+  text-shadow: none;
+}
+pre {
+  margin: 0;
+}
+
+#input {
+  display: inline;
+  outline: none;
+  visibility: visible;
+  caret-color: transparent;
+}
+
+/*
+  If you press the Insert key, the vertical line caret will automatically
+  be replaced by a one-character selection.
+*/
+#input::selection {
+  color: #000;
+  background: #0F0;
+}
+
+#input:empty::before {
+  content: ' ';
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+#input:focus + #caret {
+  animation: blink 1s steps(5, start) infinite;
+}
+
+#input.noCaret + #caret {
+  visibility: hidden;
+}
+
+#caret {
+  border: 0;
+  padding: 0;
+  outline: none;
+  background-color: #0F0;
+  display: inline-block;
+  font-family: monospace;
+  font-size: 1.8rem;
+}
+
+@keyframes flicker {
+  0% {
+    opacity: 0.27861;
+  }
+  5% {
+    opacity: 0.34769;
+  }
+  10% {
+    opacity: 0.23604;
+  }
+  15% {
+    opacity: 0.90626;
+  }
+  20% {
+    opacity: 0.18128;
+  }
+  25% {
+    opacity: 0.83891;
+  }
+  30% {
+    opacity: 0.65583;
+  }
+  35% {
+    opacity: 0.67807;
+  }
+  40% {
+    opacity: 0.26559;
+  }
+  45% {
+    opacity: 0.84693;
+  }
+  50% {
+    opacity: 0.96019;
+  }
+  55% {
+    opacity: 0.08594;
+  }
+  60% {
+    opacity: 0.20313;
+  }
+  65% {
+    opacity: 0.71988;
+  }
+  70% {
+    opacity: 0.53455;
+  }
+  75% {
+    opacity: 0.37288;
+  }
+  80% {
+    opacity: 0.71428;
+  }
+  85% {
+    opacity: 0.70419;
+  }
+  90% {
+    opacity: 0.7003;
+  }
+  95% {
+    opacity: 0.36108;
+  }
+  100% {
+    opacity: 0.24387;
+  }
+}
+@keyframes textShadow {
+  0% {
+    text-shadow: 0.4389924193300864px 0 1px rgba(0,30,255,0.5), -0.4389924193300864px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  5% {
+    text-shadow: 2.7928974010788217px 0 1px rgba(0,30,255,0.5), -2.7928974010788217px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  10% {
+    text-shadow: 0.02956275843481219px 0 1px rgba(0,30,255,0.5), -0.02956275843481219px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  15% {
+    text-shadow: 0.40218538552878136px 0 1px rgba(0,30,255,0.5), -0.40218538552878136px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  20% {
+    text-shadow: 3.4794037899852017px 0 1px rgba(0,30,255,0.5), -3.4794037899852017px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  25% {
+    text-shadow: 1.6125630401149584px 0 1px rgba(0,30,255,0.5), -1.6125630401149584px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  30% {
+    text-shadow: 0.7015590085143956px 0 1px rgba(0,30,255,0.5), -0.7015590085143956px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  35% {
+    text-shadow: 3.896914047650351px 0 1px rgba(0,30,255,0.5), -3.896914047650351px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  40% {
+    text-shadow: 3.870905614848819px 0 1px rgba(0,30,255,0.5), -3.870905614848819px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  45% {
+    text-shadow: 2.231056963361899px 0 1px rgba(0,30,255,0.5), -2.231056963361899px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  50% {
+    text-shadow: 0.08084290417898504px 0 1px rgba(0,30,255,0.5), -0.08084290417898504px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  55% {
+    text-shadow: 2.3758461067427543px 0 1px rgba(0,30,255,0.5), -2.3758461067427543px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  60% {
+    text-shadow: 2.202193051050636px 0 1px rgba(0,30,255,0.5), -2.202193051050636px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  65% {
+    text-shadow: 2.8638780614874975px 0 1px rgba(0,30,255,0.5), -2.8638780614874975px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  70% {
+    text-shadow: 0.48874025155497314px 0 1px rgba(0,30,255,0.5), -0.48874025155497314px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  75% {
+    text-shadow: 1.8948491305757957px 0 1px rgba(0,30,255,0.5), -1.8948491305757957px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  80% {
+    text-shadow: 0.0833037308038857px 0 1px rgba(0,30,255,0.5), -0.0833037308038857px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  85% {
+    text-shadow: 0.09769827255241735px 0 1px rgba(0,30,255,0.5), -0.09769827255241735px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  90% {
+    text-shadow: 3.443339761481782px 0 1px rgba(0,30,255,0.5), -3.443339761481782px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  95% {
+    text-shadow: 2.1841838852799786px 0 1px rgba(0,30,255,0.5), -2.1841838852799786px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  100% {
+    text-shadow: 2.6208764473832513px 0 1px rgba(0,30,255,0.5), -2.6208764473832513px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+}
+.crt::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(18, 16, 16, 0.1);
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+  animation: flicker 0.15s infinite;
+}
+.crt::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 2;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+.crt {
+  animation: textShadow 1.6s infinite;
+}
+#history {
+	padding-top: 1rem;
+}
+p {
+  font-size: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+a {
+  color: #00FF00;
+  text-decoration: none;
+}
+@media (min-width: 900px) {
+.flex {
+  display: flex;
+  justify-content: space-evenly;
+}
+}
+</style>
+<body class="crt">
+	<div class="flex">
+		<div>
+
+			<div style="margin-bottom: 1rem">
+				<pre>$ cat home.txt
+
+Divy Srivastava (littledivy.com)
+
+Software Engineer @ <a href="https://deno.com" target="_blank">Deno</a>
+
+I like engines, compilers and 
+cryptography.
+
+<a href="https://github.com/littledivy" target="_blank">GitHub</a> | <a href="https://twitter.com/undefined_void" target="_blank">Twitter</a> | <a href="https://www.linkedin.com/in/divy-srivastava-032939150/" target="_blank">LinkedIn</a>
+</pre>
+
+
+	</div>
+
+		</div>
+
+		<div>
+	<div id="history">
+		<pre>$ journalctl -xe
+systemd[1]: Starting littledivy.com...
+systemd[1]: Started littledivy.com.
+
+$ tree
+.
+├── home
+└── posts
+    └── <a href="/turbocall.pdf">turbocall.pdf</a>
+		</pre>
+	</div>
+	$
+	<div id="input" contenteditable="true"></div><button id="caret" for="input">&nbsp;</button>
+		</div>
+	</div>
+</body>
+<script>
+const history = document.getElementById('history');
+const input = document.getElementById('input');
+const cursor = document.getElementById('cursor');
+
+function focusAndMoveCursorToTheEnd(e) {
+  input.focus();
+
+  const range = document.createRange();
+  const selection = window.getSelection();
+  const { childNodes } = input;
+  const lastChildNode = childNodes && childNodes.length - 1;
+
+  range.selectNodeContents(lastChildNode === -1 ? input : childNodes[lastChildNode]);
+  range.collapse(false);
+
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function handleCommand(command) {
+  const line = document.createElement('DIV');
+
+	line.innerHTML = `$ ${command} <br> Unknown command: ${command}`;
+
+  history.appendChild(line);
+}
+
+document.addEventListener('selectionchange', () => {
+  if (document.activeElement.id !== 'input') return;
+
+  const range = window.getSelection().getRangeAt(0);
+  const start = range.startOffset;
+  const end = range.endOffset;
+  const length = input.textContent.length;
+
+  if (end < length) {
+    input.classList.add('noCaret');
+  } else {
+    input.classList.remove('noCaret');
+  }
+});
+
+input.addEventListener('input', () => {
+  // If we paste HTML, format it as plain text and break it up
+  // input individual lines/commands:
+  if (input.childElementCount > 0) {
+    const lines = input.innerText.replace(/\n$/, '').split('\n');
+    const lastLine = lines[lines.length - 1];
+
+    for (let i = 0; i <= lines.length - 2; ++i) {
+      handleCommand(lines[i]);
+    }
+
+    input.textContent = lastLine;
+
+    focusAndMoveCursorToTheEnd();
+  }
+
+  // If we delete everything, display the square caret again:
+  if (input.innerText.length === 0) {
+    input.classList.remove('noCaret');
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  // If some key is pressed outside the input, focus it and move the cursor
+  // to the end:
+  if (e.target !== input) focusAndMoveCursorToTheEnd();
+});
+
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+
+    handleCommand(input.textContent);
+    input.textContent = '';
+    focusAndMoveCursorToTheEnd();
+  }
+});
+
+// Set the focus to the input so that you can start typing straigh away:
+input.focus();
+</script>
+</html>
