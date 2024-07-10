@@ -2,12 +2,14 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <title>littledivy.com</title>
-<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 </head>
 <style>
+html, body {
+  min-height: 100vh;
+}
+
 body {
   background-color: black;
-  height: 100%;
   margin: 0;
   padding: 2rem;
   overflow-x: hidden;
@@ -216,7 +218,7 @@ pre {
 .crt::after {
   content: " ";
   display: block;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
@@ -230,7 +232,7 @@ pre {
 .crt::before {
   content: " ";
   display: block;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
