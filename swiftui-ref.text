@@ -1,0 +1,153 @@
+% SwiftUI quick reference
+% Divy Srivastava
+% 10 July 2024
+
+Use ZStack for wrapping views without side effects.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.swift}
+var body: some View {
+  ZStack {
+    SomeView()
+    AnotherView()
+  }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+VStack / HStack plus Spacer for quick alignment.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.swift}
+var body: some View {
+  VStack {
+    Text("Hello")
+    Spacer()
+  }
+}
+
+var body: some View {
+  HStack {
+    Spacer()
+    Text("World")
+  }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Use GeometryReader for getting the size of the parent view.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.swift}
+var body: some View {
+  GeometryReader { geometry in
+    Text("Width: \(geometry.size.width)")
+  }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Use @State for mutable state.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.swift}
+@State private var count = 0
+
+var body: some View {
+  Button(action: {
+    count += 1
+  }) {
+    Text("Count: \(count)")
+  }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+:::
+::::::::::::::
+
+
+Use @Binding for passing state down the view hierarchy.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.swift}
+struct ContentView: View {
+  @State private var count = 0
+
+  var body: some View {
+    ChildView(count: $count)
+  }
+}
+
+struct ChildView: View {
+  @Binding var count: Int
+
+  var body: some View {
+    Button(action: {
+      count += 1
+    }) {
+      Text("Count: \(count)")
+    }
+  }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Use @ObservedObject for observing changes in an object.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.swift}
+class UserData: ObservableObject {
+  @Published var name = "Alice"
+}
+
+struct ContentView: View {
+  @ObservedObject var userData = UserData()
+
+  var body: some View {
+    Text("Hello, \(userData.name)!")
+  }
+}
+
+struct ChildView: View {
+  @ObservedObject var userData: UserData
+
+  var body: some View {
+    Button(action: {
+      userData.name = "Bob"
+    }) {
+      Text("Change name")
+    }
+  }
+}
+
+ContentView()
+  .sheet(isPresented: $showingSheet) {
+    ChildView(userData: userData)
+  }
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Use @AppStorage for persisting user settings.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.swift}
+@AppStorage("name") var name = "Alice"
+
+var body: some View {
+  Text("Hello, \(name)!")
+}
+
+Button(action: {
+  name = "Bob"
+}) {
+  Text("Change name")
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+@AppStorage can be duplicated in multiple views as long as the key is the same.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {.swift}
+@AppStorage("name") var name = "Alice"
+
+var body: some View {
+  Text("Hello, \(name)!")
+}
+
+struct ChildView: View {
+  @AppStorage("name") var name = "Alice"
+
+  var body: some View {
+    Text("Hello, \(name)!")
+  }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
