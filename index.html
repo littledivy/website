@@ -327,11 +327,14 @@ const cursor = document.getElementById('cursor');
 const media = document.getElementById('media');
 const mediaMeta = document.getElementById('media-meta');
 
-const random = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const random = (min, max, prev) => {
+  const num = Math.floor(Math.random() * (max - min + 1)) + min;
+  return num === prev ? random(min, max, prev) : num;
+};
 let img = random(1, 3);
 media.src = `media/${img}.jpg`;
 media.onclick = () => {
-	img = random(1, 3);
+	img = random(1, 3, img);
 	media.src = `media/${img}.jpg`;
 	getMediaMeta();
 };
