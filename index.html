@@ -340,7 +340,11 @@ media.onclick = () => {
 async function getMediaMeta() {
 	await fetch(`media/${img}.text`)
 		.then(response => response.text())
-		.then(text => text.split('\n')[0])
+		.then(text => {
+		  const city = text.split('\n')[0];
+		  const [latitude, longitude] = text.split('\n')[1].split(', ').map(s => Number(s.trim()));
+		  return `<a href="https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}" target="_blank">${city}</a>`;
+		})
 		.then(text => mediaMeta.innerHTML = text);
 }
 
