@@ -10,4 +10,4 @@ media/%.text: media/%.jpg
 all: $(HTML) $(MEDIA_TXT)
 
 %.html: %.text
-	pandoc $< -s --highlight-style tango -o $@
+	pandoc $< -s --highlight-style tango --css=style.css -o $@

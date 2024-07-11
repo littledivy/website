@@ -1,6 +1,9 @@
-% JSR iOS client beta
-% Divy Srivastava
-% 10 July 2024
+---
+mainfont: Helvetica, Arial, sans-serif
+title: JSR iOS client beta
+author: Divy Srivastava
+date: 11 July 2024
+---
 
 Announcing the [jsr.io](https://jsr.io) iOS client beta!
 
@@ -18,7 +21,7 @@ Announcing the [jsr.io](https://jsr.io) iOS client beta!
 
 ## Try out via TestFlight
 
-Help test out beta builds using TestFlight: [https://testflight.apple.com/join/7A7RtRzr](https://testflight.apple.com/join/7A7RtRzr)
+Help test out beta builds using TestFlight [here](https://testflight.apple.com/join/7A7RtRzr)
 
 ## Contribute
 
