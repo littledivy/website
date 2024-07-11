@@ -1,0 +1,55 @@
+% spt - spot instance provisioning for Equinix Metal
+% Divy Srivastava
+% June 2024
+
+**spt** is a spot instance provisioning and orchestration tool for Equinix Metal.
+
+```
+curl -fsSL https://spt.littledivy.com/install.sh
+```
+
+https://github.com/littledivy/spt
+
+![](https://raw.githubusercontent.com/littledivy/spt/main/demo.gif)
+  
+## Reference      
+
+```
+spt(1)
+
+Usage:
+  spt provision
+  spt run
+  spt self
+  spt attach
+  spt validate
+
+Options:
+  -h, --help  Show this screen.
+  -c, --config  Configuration file [default: spt.toml]
+  -d, --detach  Detach local client
+  --delete  Deprovision device
+  --id  Device ID
+```
+
+## Example configuration
+
+```
+# spt.toml
+
+[project]
+name = "example"
+
+[service.equinix]
+project = "EQUINIX_PROJECT"
+api_key = "EQUINIX_API_KEY"
+spot_price_max = 0.2
+plan = "m3.small.x86"
+os = "ubuntu_22_04"
+
+[build.args]
+passthrough = ["BUILD_ARG_1"]
+
+[run.env]
+passthrough = ["RUN_ENV_1"]
+```
