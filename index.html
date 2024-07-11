@@ -280,6 +280,9 @@ a {
   padding: 0.5rem;
   font-size: 1.5rem;
 }
+.selected-suggestion {
+  background-color: #0080FF;
+}
 </style>
 <body class="crt">
 	<div class="flex">
@@ -308,24 +311,13 @@ $ open $(random 1 10).jpg
 	</div>
 
 		</div>
-
 		<div>
 	<div id="history">
-		<pre>$ journalctl -xe
-systemd[1]: Starting littledivy.com...
-systemd[1]: Started littledivy.com.
 
-$ tree -D
-.
-├── [Jul 2024] <a href="/jsr-ios.html">jsr-ios.html</a>
-├── [Jul 2024] <a href="/swiftui-ref.html">swiftui-ref.html</a>
-├── [Mar 2024] <a href="/turbocall.html">turbocall.html</a>
-└── [Mar 2024] <a href="/turbocall.pdf">turbocall.pdf</a>
-
-		</pre>
 	</div>
 	$
 	<div id="input" contenteditable="true"></div><button id="caret" for="input">&nbsp;</button>
+	<div id="suggest"></div>
 		</div>
 	</div>
 </body>
@@ -333,6 +325,7 @@ $ tree -D
 const history = document.getElementById('history');
 const input = document.getElementById('input');
 const cursor = document.getElementById('cursor');
+const suggest = document.getElementById('suggest');
 const media = document.getElementById('media');
 const mediaMeta = document.getElementById('media-meta');
 
@@ -378,11 +371,53 @@ function focusAndMoveCursorToTheEnd(e) {
 
 function handleCommand(command) {
   const line = document.createElement('DIV');
-
-	line.innerHTML = `$ ${command} <br> Unknown command: ${command}`;
-
+	line.innerHTML = `$ ${command} <br> ${exec(command)}<br><br>`;
   history.appendChild(line);
 }
+
+const files = [
+  { name: 'jsr-ios.html', date: 'Jul 2024' },
+  { name: 'swiftui-ref.html', date: 'Jul 2024' },
+  { name: 'turbocall.html', date: 'Mar 2024' },
+  { name: 'turbocall.pdf', date: 'Mar 2024' },
+];
+
+function exec(command) {
+  const [cmd, ...args] = command.split(' ');
+  switch (cmd) {
+    case 'open':{
+      if (files.some(file => file.name === args[0])) {
+	      setTimeout(() => window.open(args[0], '_blank'), 200);
+	return `Opening ${args[0]}`;
+      }
+      return `File not found: ${args[0]}`;
+    }
+    case 'tree':
+      let tree = '.';
+	for (let i = 0; i < files.length; i++) {
+	  let d = args[0] === '-D' ? `[${files[i].date}] `: ""
+	  tree += `<br>`
+  	  if (i === files.length - 1) {
+		  tree += `└── ${d}<a href="/${files[i].name}">${files[i].name}</a>`;
+   	  } else {
+		  tree += `├── ${d}<a href="/${files[i].name}">${files[i].name}</a>`;
+	  }
+      }
+      return tree;
+    case 'ls':
+      return files.map(file => file.name).join('<br>');
+    case 'clear':
+      history.innerHTML = '';
+      return '';
+    case 'journalctl':
+      return 'systemd[1]: Starting littledivy.com...<br>systemd[1]: Started littledivy.com.';
+    default:
+      return `Unknown command: ${command}`
+  }
+}
+
+handleCommand('journalctl -xe');
+handleCommand('tree -D');
 
 document.addEventListener('selectionchange', () => {
   if (document.activeElement.id !== 'input') return;
@@ -400,8 +435,6 @@ document.addEventListener('selectionchange', () => {
 });
 
 input.addEventListener('input', () => {
-  // If we paste HTML, format it as plain text and break it up
-  // input individual lines/commands:
   if (input.childElementCount > 0) {
     const lines = input.innerText.replace(/\n$/, '').split('\n');
     const lastLine = lines[lines.length - 1];
@@ -411,33 +444,55 @@ input.addEventListener('input', () => {
     }
 
     input.textContent = lastLine;
-
     focusAndMoveCursorToTheEnd();
   }
 
-  // If we delete everything, display the square caret again:
   if (input.innerText.length === 0) {
     input.classList.remove('noCaret');
   }
 });
 
 document.addEventListener('keydown', (e) => {
-  // If some key is pressed outside the input, focus it and move the cursor
-  // to the end:
   if (e.target !== input) focusAndMoveCursorToTheEnd();
 });
 
+let currentSuggestion = 0;
 input.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     e.preventDefault();
+    if (suggest.innerHTML) {
+      const node = document.getElementsByClassName('selected-suggestion')[0];
+      if (node) {
+	input.textContent = input.textContent.replace(/[^ ]+$/, node.textContent);
+      }
+    }
 
     handleCommand(input.textContent);
     input.textContent = '';
+    suggest.innerHTML = '';
     focusAndMoveCursorToTheEnd();
+  } else if (e.key === 'Tab') {
+    e.preventDefault();
+    if (suggest.innerHTML) {
+      currentSuggestion++;
+    }
+
+    const [cmd, ...args] = input.textContent.split(' ');
+    const suggestions = files
+      .map(file => file.name)
+      .filter(name => args[0] ? name.startsWith(args[0]) : true);
+
+    suggest.innerHTML = suggestions
+     .map((name, idx) => `<span class=${currentSuggestion % suggestions.length == idx ? "selected-suggestion" : ""}>${name}</span>`)
+     .join('<br>');
+  }
+
+  if ((e.key === 'Backspace' || e.key === "Escape")
+	  && suggest.innerHTML) {
+    suggest.innerHTML = '';
   }
 });
 
-// Set the focus to the input so that you can start typing straigh away:
 input.focus();
 </script>
 </html>
