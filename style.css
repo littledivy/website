@@ -15,7 +15,7 @@ body {
 body {
   padding: 2rem;
   overflow-x: hidden;
-  font-family: Inconsolata, monospace;
+  font: 1.3em Inconsolata, monospace;
   &::after {
     content: "";
     position: absolute;
