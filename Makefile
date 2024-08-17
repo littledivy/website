@@ -16,4 +16,4 @@ all: $(HTML) $(MEDIA_TXT)
 		pandoc $< -f markdown+autolink_bare_uris -s --highlight-style tango $$args -o $@; \
 		exit; \
 	fi; \
-	pandoc $< --toc -f markdown+autolink_bare_uris -s --highlight-style tango --css=style.css -o $@; \
+	pandoc $< --toc -f markdown+autolink_bare_uris -s --highlight-style haddock --css=style.css -o $@; \
