@@ -1,0 +1,164 @@
+---
+title: Inject RO data into existing executables
+author: Divy Srivastava
+date: 17 August 2024
+---
+
+## Description
+
+This document describes inner workings of sui, an injection tool for embedding arbitrary data into precompiled executables (ELF, PE and Mach-O).
+
+It is cross-platform and supports cross-"patching" for all formats. Under the hood sui uses format-specific features described in [Supported formats](#supported-formats).
+
+It produces valid executables that can be code-signed and distributed.
+
+Emebedded data can be accessed by the executable at runtime using `libsui` library.
+
+## Using sui
+
+It is available as a Rust crate and a command-line tool.
+
+```sh
+cargo add libsui
+```
+
+### Run-time
+
+Find and extract the embedded data from the executable:
+
+```rust
+use libsui::find_section;
+
+if let Some(data) = find_section("mydata") {
+	// found
+}
+```
+
+Name of the section is the same as the one used during injection. It refers to the section name in Mach-O, resource name in PE and tag in ELF.
+
+### Injecting
+
+Build and sign a new Mach-O executable:
+```rust
+use sui::Macho;
+
+Macho::from(input)? // load an existing executable
+	.write_section("mydata", data)? // write a new section with auxiliary data
+	.build_and_sign(output)?; // build and sign the executable
+```
+
+Build a new Portable Executable:
+```rust
+use sui::PortableExecutable;
+
+PortableExecutable::from(input)? // load an existing executable
+	.write_resource("mydata", data)? // inject a new resource (RCDATA) with auxiliary data
+	.build(output)?; // build and sign the executable
+```
+
+Build a new ELF executable:
+```rust
+use sui::Elf;
+
+Elf::from(input)? // load an existing executable
+	.append("mydata", data)? // tag and append auxiliary data
+	.build(output)?; // build
+```
+
+Build a new PE with icon:
+```rust
+use sui::PortableExecutable;
+
+PortableExecutable::from(input)? // load an existing executable
+	.write_resource("mydata", data)? // inject a new resource (RCDATA) with auxiliary data
+	.write_icon("icon.ico")? // inject an icon resource (RT_ICON)
+	.build(output)?; // build
+```
+
+Ad-hoc codesign a modified arm64 Mach-O executable:
+
+```rust
+use sui::apple_codesign::MachoSigner;
+
+MachoSigner::new(input)? // load an existing executable
+	.sign(output)?; // sign the executable with ad-hoc signature
+```
+
+Refer to the [API documentation](https://docs.rs/libsui) for more up-to-date documentation.
+
+## Supported formats
+
+ELF, PE and Mach-O are supported.
+
+### Mach-O
+
+Resource is added as section in a new segment, load commands are updated and
+offsets are adjusted. `__LINKEDIT` is kept at the end of the file.
+
+It is similar to linker's `-sectcreate,__FOO,__foo,hello.txt` option.
+
+Note that `Macho::build` will invalidate existing code signature. on Apple
+sillicon, kernel refuses to run executables with bad signatures.
+
+Use `Macho::build_and_sign` to re-sign the binary with ad-hoc signature. See
+[`apple_codesign.rs`](./apple_codesign.rs) for details. This is similar to
+`codesign -s - ./out` command.
+
+```rust
+Macho::from(exe)?
+    .write_section("__sect", data)?
+    .build_and_sign(&mut out)?;
+```
+
+```
+$ codesign -d -vvv ./out
+
+Executable=/Users/divy/gh/sui/out
+Identifier=a.out
+Format=Mach-O thin (arm64)
+CodeDirectory v=20400 size=10238 flags=0x20002(adhoc,linker-signed) hashes=317+0 location=embedded
+Hash type=sha256 size=32
+CandidateCDHash sha256=6b1abb20f2291dd9b0dbcd0659a918cb2d0e6b18
+CandidateCDHashFull sha256=6b1abb20f2291dd9b0dbcd0659a918cb2d0e6b1876153efa17f90dc8b3a8f177
+Hash choices=sha256
+CMSDigest=6b1abb20f2291dd9b0dbcd0659a918cb2d0e6b1876153efa17f90dc8b3a8f177
+CMSDigestType=2
+CDHash=6b1abb20f2291dd9b0dbcd0659a918cb2d0e6b18
+Signature=adhoc
+Info.plist=not bound
+TeamIdentifier=not set
+Sealed Resources=none
+Internal requirements=none
+```
+
+### ELF
+
+Data is simply appended to the end of the file with a tag and magic descriptor. Extracted from
+`current_exe()` at run-time.
+
+This is subject to change and may use ELF linker notes (`PT_NOTE`) in the
+future.
+
+### PE
+
+Resource is added into a new PE resource directory as `RT_RCDATA` type and
+extracted using `FindResource` and `LoadResource` at run-time.
+
+## Comparison with postject
+
+Sui supports ad-hoc codesigning for Mach-O executables and Icon resources for PE executables which `postject` does not.
+
+Sui is much faster and lightweight compared to `postject` which is built on top of `LIEF`, a heavy C++ dependency.
+
+```
+$ time sui ./node test.txt ./out
+0m0.151s
+
+$ time postject ./node name test.txt
+0m8.993s
+```
+
+
+## Conclusion
+
+sui is open-source on Github: https://github.com/denoland/sui and is the tech behind `deno compile`, converts JavaScript and TypeScript code into a single executable.

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Divy Srivastava" />
+  <meta name="dcterms.date" content="2024-08-17" />
+  <title>Inject RO data into existing executables</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; } /* Alert */
+    code span.an { color: #008000; } /* Annotation */
+    code span.at { } /* Attribute */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #0000ff; } /* ControlFlow */
+    code span.ch { color: #008080; } /* Char */
+    code span.cn { } /* Constant */
+    code span.co { color: #008000; } /* Comment */
+    code span.cv { color: #008000; } /* CommentVar */
+    code span.do { color: #008000; } /* Documentation */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.im { } /* Import */
+    code span.in { color: #008000; } /* Information */
+    code span.kw { color: #0000ff; } /* Keyword */
+    code span.op { } /* Operator */
+    code span.ot { color: #ff4000; } /* Other */
+    code span.pp { color: #ff4000; } /* Preprocessor */
+    code span.sc { color: #008080; } /* SpecialChar */
+    code span.ss { color: #008080; } /* SpecialString */
+    code span.st { color: #008080; } /* String */
+    code span.va { } /* Variable */
+    code span.vs { color: #008080; } /* VerbatimString */
+    code span.wa { color: #008000; font-weight: bold; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="style.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Inject RO data into existing executables</h1>
+<p class="author">Divy Srivastava</p>
+<p class="date">17 August 2024</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#description" id="toc-description">Description</a></li>
+<li><a href="#using-sui" id="toc-using-sui">Using sui</a>
+<ul>
+<li><a href="#run-time" id="toc-run-time">Run-time</a></li>
+<li><a href="#injecting" id="toc-injecting">Injecting</a></li>
+</ul></li>
+<li><a href="#supported-formats" id="toc-supported-formats">Supported
+formats</a>
+<ul>
+<li><a href="#mach-o" id="toc-mach-o">Mach-O</a></li>
+<li><a href="#elf" id="toc-elf">ELF</a></li>
+<li><a href="#pe" id="toc-pe">PE</a></li>
+</ul></li>
+<li><a href="#comparison-with-postject"
+id="toc-comparison-with-postject">Comparison with postject</a></li>
+<li><a href="#conclusion" id="toc-conclusion">Conclusion</a></li>
+</ul>
+</nav>
+<h2 id="description">Description</h2>
+<p>This document describes inner workings of sui, an injection tool for
+embedding arbitrary data into precompiled executables (ELF, PE and
+Mach-O).</p>
+<p>It is cross-platform and supports cross-“patching” for all formats.
+Under the hood sui uses format-specific features described in <a
+href="#supported-formats">Supported formats</a>.</p>
+<p>It produces valid executables that can be code-signed and
+distributed.</p>
+<p>Emebedded data can be accessed by the executable at runtime using
+<code>libsui</code> library.</p>
+<h2 id="using-sui">Using sui</h2>
+<p>It is available as a Rust crate and a command-line tool.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> add libsui</span></code></pre></div>
+<h3 id="run-time">Run-time</h3>
+<p>Find and extract the embedded data from the executable:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">libsui::</span>find_section<span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">let</span> <span class="cn">Some</span>(data) <span class="op">=</span> find_section(<span class="st">&quot;mydata&quot;</span>) <span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// found</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Name of the section is the same as the one used during injection. It
+refers to the section name in Mach-O, resource name in PE and tag in
+ELF.</p>
+<h3 id="injecting">Injecting</h3>
+<p>Build and sign a new Mach-O executable:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">sui::</span>Macho<span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="pp">Macho::</span>from(input)<span class="op">?</span> <span class="co">// load an existing executable</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>write_section(<span class="st">&quot;mydata&quot;</span><span class="op">,</span> data)<span class="op">?</span> <span class="co">// write a new section with auxiliary data</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>build_and_sign(output)<span class="op">?;</span> <span class="co">// build and sign the executable</span></span></code></pre></div>
+<p>Build a new Portable Executable:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">sui::</span>PortableExecutable<span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="pp">PortableExecutable::</span>from(input)<span class="op">?</span> <span class="co">// load an existing executable</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>write_resource(<span class="st">&quot;mydata&quot;</span><span class="op">,</span> data)<span class="op">?</span> <span class="co">// inject a new resource (RCDATA) with auxiliary data</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>build(output)<span class="op">?;</span> <span class="co">// build and sign the executable</span></span></code></pre></div>
+<p>Build a new ELF executable:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">sui::</span>Elf<span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="pp">Elf::</span>from(input)<span class="op">?</span> <span class="co">// load an existing executable</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>append(<span class="st">&quot;mydata&quot;</span><span class="op">,</span> data)<span class="op">?</span> <span class="co">// tag and append auxiliary data</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>build(output)<span class="op">?;</span> <span class="co">// build</span></span></code></pre></div>
+<p>Build a new PE with icon:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">sui::</span>PortableExecutable<span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="pp">PortableExecutable::</span>from(input)<span class="op">?</span> <span class="co">// load an existing executable</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>write_resource(<span class="st">&quot;mydata&quot;</span><span class="op">,</span> data)<span class="op">?</span> <span class="co">// inject a new resource (RCDATA) with auxiliary data</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>write_icon(<span class="st">&quot;icon.ico&quot;</span>)<span class="op">?</span> <span class="co">// inject an icon resource (RT_ICON)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>build(output)<span class="op">?;</span> <span class="co">// build</span></span></code></pre></div>
+<p>Ad-hoc codesign a modified arm64 Mach-O executable:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">sui::apple_codesign::</span>MachoSigner<span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="pp">MachoSigner::</span>new(input)<span class="op">?</span> <span class="co">// load an existing executable</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>sign(output)<span class="op">?;</span> <span class="co">// sign the executable with ad-hoc signature</span></span></code></pre></div>
+<p>Refer to the <a href="https://docs.rs/libsui">API documentation</a>
+for more up-to-date documentation.</p>
+<h2 id="supported-formats">Supported formats</h2>
+<p>ELF, PE and Mach-O are supported.</p>
+<h3 id="mach-o">Mach-O</h3>
+<p>Resource is added as section in a new segment, load commands are
+updated and offsets are adjusted. <code>__LINKEDIT</code> is kept at the
+end of the file.</p>
+<p>It is similar to linker’s
+<code>-sectcreate,__FOO,__foo,hello.txt</code> option.</p>
+<p>Note that <code>Macho::build</code> will invalidate existing code
+signature. on Apple sillicon, kernel refuses to run executables with bad
+signatures.</p>
+<p>Use <code>Macho::build_and_sign</code> to re-sign the binary with
+ad-hoc signature. See <a
+href="./apple_codesign.rs"><code>apple_codesign.rs</code></a> for
+details. This is similar to <code>codesign -s - ./out</code>
+command.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="pp">Macho::</span>from(exe)<span class="op">?</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>write_section(<span class="st">&quot;__sect&quot;</span><span class="op">,</span> data)<span class="op">?</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>build_and_sign(<span class="op">&amp;</span><span class="kw">mut</span> out)<span class="op">?;</span></span></code></pre></div>
+<pre><code>$ codesign -d -vvv ./out
+
+Executable=/Users/divy/gh/sui/out
+Identifier=a.out
+Format=Mach-O thin (arm64)
+CodeDirectory v=20400 size=10238 flags=0x20002(adhoc,linker-signed) hashes=317+0 location=embedded
+Hash type=sha256 size=32
+CandidateCDHash sha256=6b1abb20f2291dd9b0dbcd0659a918cb2d0e6b18
+CandidateCDHashFull sha256=6b1abb20f2291dd9b0dbcd0659a918cb2d0e6b1876153efa17f90dc8b3a8f177
+Hash choices=sha256
+CMSDigest=6b1abb20f2291dd9b0dbcd0659a918cb2d0e6b1876153efa17f90dc8b3a8f177
+CMSDigestType=2
+CDHash=6b1abb20f2291dd9b0dbcd0659a918cb2d0e6b18
+Signature=adhoc
+Info.plist=not bound
+TeamIdentifier=not set
+Sealed Resources=none
+Internal requirements=none</code></pre>
+<h3 id="elf">ELF</h3>
+<p>Data is simply appended to the end of the file with a tag and magic
+descriptor. Extracted from <code>current_exe()</code> at run-time.</p>
+<p>This is subject to change and may use ELF linker notes
+(<code>PT_NOTE</code>) in the future.</p>
+<h3 id="pe">PE</h3>
+<p>Resource is added into a new PE resource directory as
+<code>RT_RCDATA</code> type and extracted using
+<code>FindResource</code> and <code>LoadResource</code> at run-time.</p>
+<h2 id="comparison-with-postject">Comparison with postject</h2>
+<p>Sui supports ad-hoc codesigning for Mach-O executables and Icon
+resources for PE executables which <code>postject</code> does not.</p>
+<p>Sui is much faster and lightweight compared to <code>postject</code>
+which is built on top of <code>LIEF</code>, a heavy C++ dependency.</p>
+<pre><code>$ time sui ./node test.txt ./out
+0m0.151s
+
+$ time postject ./node name test.txt
+0m8.993s</code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>sui is open-source on Github: <a
+href="https://github.com/denoland/sui"
+class="uri">https://github.com/denoland/sui</a> and is the tech behind
+<code>deno compile</code>, converts JavaScript and TypeScript code into
+a single executable.</p>
+</body>
+</html>
