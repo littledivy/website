@@ -24,6 +24,9 @@
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
   <link rel="stylesheet" href="style.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
 </head>
 <body>
 <header id="title-block-header">
@@ -32,6 +35,13 @@ Metal</h1>
 <p class="author">Divy Srivastava</p>
 <p class="date">June 2024</p>
 </header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#reference" id="toc-reference">Reference</a></li>
+<li><a href="#example-configuration"
+id="toc-example-configuration">Example configuration</a></li>
+</ul>
+</nav>
 <p><strong>spt</strong> is a spot instance provisioning and
 orchestration tool for Equinix Metal.</p>
 <pre><code>curl -fsSL https://spt.littledivy.com/install.sh</code></pre>

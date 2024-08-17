@@ -9,11 +9,11 @@ media/%.text: media/%.jpg
 
 all: $(HTML) $(MEDIA_TXT)
 
-%.html: %.text
+%.html: %.text style.css
 	line=`grep -m 1 '<!--' $<`; \
         if [ -n "$$line" ]; then \
 		args=`echo $$line | sed 's/<!--//g' | sed 's/-->//g'`; \
 		pandoc $< -f markdown+autolink_bare_uris -s --highlight-style tango $$args -o $@; \
 		exit; \
 	fi; \
-	pandoc $< -f markdown+autolink_bare_uris -s --highlight-style tango --css=style.css -o $@; \
+	pandoc $< --toc -f markdown+autolink_bare_uris -s --highlight-style tango --css=style.css -o $@; \
