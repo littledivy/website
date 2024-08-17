@@ -1,6 +1,7 @@
 <!DOCTYPE html><html lang="en">
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>littledivy.com</title>
 </head>
 <style>
@@ -16,51 +17,9 @@ body {
 pre {
   margin: 0;
 }
-
-#input {
-  display: inline;
-  outline: none;
-  visibility: visible;
-  caret-color: transparent;
-}
-
-/*
-  If you press the Insert key, the vertical line caret will automatically
-  be replaced by a one-character selection.
-*/
-#input::selection {
-  color: #000;
-  background: #0F0;
-}
-
-#input:empty::before {
-  content: ' ';
-}
-
-@keyframes blink {
-  to {
-    visibility: hidden;
-  }
-}
-
-#input:focus + #caret {
-  animation: blink 1s steps(5, start) infinite;
-}
-
-#input.noCaret + #caret {
-  visibility: hidden;
-}
-
-#caret {
-  border: 0;
+ul {
+  list-style-type: none;
   padding: 0;
-  outline: none;
-  background-color: #000;
-  display: inline-block;
-  font-family: monospace;
-}
-.selected-suggestion {
-  background-color: #0080FF;
 }
 </style>
 <body>
@@ -69,174 +28,20 @@ pre {
 
 			<div style="margin-bottom: 1rem;">
 				<p> Divy Srivastava (littledivy.com) </p>
-
+				<p> github.com/littledivy </p>
 				<p> Software Engineer @ <a href="https://deno.com" target="_blank">Deno</a> </p>
-
-				<p> I like engines, compilers and 
-cryptography. </p>
-
-				<p><a href="https://github.com/littledivy" target="_blank">GitHub</a> | <a href="https://twitter.com/undefined_void" target="_blank">Twitter</a> | <a href="https://www.linkedin.com/in/divy-srivastava-032939150/" target="_blank">LinkedIn</a></p>
-
-				<p>Let's work together! <a href="mailto:dj.srivastava23@gmail.com">Reach out.</a></p>
-
 	</div>
 
 		</div>
 		<div>
-	<div id="history">
-
-	</div>
-	$
-	<div id="input" contenteditable="true"></div><button id="caret" for="input">&nbsp;</button>
-	<div id="suggest"></div>
-		</div>
+	<div>
+		<ul>
+			<li><a href="jsr-ios.html">JSR iOS beta</a> (Jul 2024)</li>
+			<li><a href="swiftui-ref.html">SwiftUI Reference</a> (Jul 2024)</li>
+			<li><a href="spt.html">SPT</a> (Jun 2024)</li>
+			<li><a href="turbocall.html">TurboCall</a> (Mar 2024)</li>
+			<li><a href="turbocall.pdf">TurboCall PDF</a> (Mar 2024)</li>
+		</ul>
 	</div>
 </body>
-<script>
-const history = document.getElementById('history');
-const input = document.getElementById('input');
-const cursor = document.getElementById('cursor');
-const suggest = document.getElementById('suggest');
-
-function focusAndMoveCursorToTheEnd(e) {
-  input.focus();
-
-  const range = document.createRange();
-  const selection = window.getSelection();
-  const { childNodes } = input;
-  const lastChildNode = childNodes && childNodes.length - 1;
-
-  range.selectNodeContents(lastChildNode === -1 ? input : childNodes[lastChildNode]);
-  range.collapse(false);
-
-  selection.removeAllRanges();
-  selection.addRange(range);
-}
-
-function handleCommand(command) {
-  const line = document.createElement('DIV');
-	line.innerHTML = `$ ${command} <br> ${exec(command)}<br><br>`;
-  history.appendChild(line);
-}
-
-const files = [
-  { name: 'jsr-ios.html', date: 'Jul 2024' },
-  { name: 'swiftui-ref.html', date: 'Jul 2024' },
-  { name: 'spt.html', date: 'Jun 2024' },
-  { name: 'turbocall.html', date: 'Mar 2024' },
-  { name: 'turbocall.pdf', date: 'Mar 2024' },
-];
-
-function exec(command) {
-  const [cmd, ...args] = command.split(' ');
-  switch (cmd) {
-    case 'open':{
-      if (files.some(file => file.name === args[0])) {
-	      setTimeout(() => window.open(args[0], '_blank'), 200);
-	return `Opening ${args[0]}`;
-      }
-      return `File not found: ${args[0]}`;
-    }
-    case 'tree':
-      let tree = '.';
-	for (let i = 0; i < files.length; i++) {
-	  let d = args[0] === '-D' ? `[${files[i].date}] `: ""
-	  tree += `<br>`
-  	  if (i === files.length - 1) {
-		  tree += `└── ${d}<a href="/${files[i].name}">${files[i].name}</a>`;
-   	  } else {
-		  tree += `├── ${d}<a href="/${files[i].name}">${files[i].name}</a>`;
-	  }
-      }
-      return tree;
-    case 'ls':
-      return files.map(file => file.name).join('<br>');
-    case 'clear':
-      history.innerHTML = '';
-      return '';
-    case 'journalctl':
-      return 'systemd[1]: Starting littledivy.com...<br>systemd[1]: Started littledivy.com.';
-    default:
-      return `Unknown command: ${command}`
-  }
-}
-
-handleCommand('tree -D');
-
-document.addEventListener('selectionchange', () => {
-  if (document.activeElement.id !== 'input') return;
-
-  const range = window.getSelection().getRangeAt(0);
-  const start = range.startOffset;
-  const end = range.endOffset;
-  const length = input.textContent.length;
-
-  if (end < length) {
-    input.classList.add('noCaret');
-  } else {
-    input.classList.remove('noCaret');
-  }
-});
-
-input.addEventListener('input', () => {
-  if (input.childElementCount > 0) {
-    const lines = input.innerText.replace(/\n$/, '').split('\n');
-    const lastLine = lines[lines.length - 1];
-
-    for (let i = 0; i <= lines.length - 2; ++i) {
-      handleCommand(lines[i]);
-    }
-
-    input.textContent = lastLine;
-    focusAndMoveCursorToTheEnd();
-  }
-
-  if (input.innerText.length === 0) {
-    input.classList.remove('noCaret');
-  }
-});
-
-document.addEventListener('keydown', (e) => {
-  if (e.target !== input) focusAndMoveCursorToTheEnd();
-});
-
-let currentSuggestion = 0;
-input.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    if (suggest.innerHTML) {
-      const node = document.getElementsByClassName('selected-suggestion')[0];
-      if (node) {
-	input.textContent = input.textContent.replace(/[^ ]+$/, node.textContent);
-      }
-    }
-
-    handleCommand(input.textContent);
-    input.textContent = '';
-    suggest.innerHTML = '';
-    focusAndMoveCursorToTheEnd();
-  } else if (e.key === 'Tab') {
-    e.preventDefault();
-    if (suggest.innerHTML) {
-      currentSuggestion++;
-    }
-
-    const [cmd, ...args] = input.textContent.split(' ');
-    const suggestions = files
-      .map(file => file.name)
-      .filter(name => args[0] ? name.startsWith(args[0]) : true);
-
-    suggest.innerHTML = suggestions
-     .map((name, idx) => `<span class=${currentSuggestion % suggestions.length == idx ? "selected-suggestion" : ""}>${name}</span>`)
-     .join('<br>');
-  }
-
-  if ((e.key === 'Backspace' || e.key === "Escape")
-	  && suggest.innerHTML) {
-    suggest.innerHTML = '';
-  }
-});
-
-input.focus();
-</script>
 </html>
