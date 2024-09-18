@@ -1,0 +1,21 @@
+---
+title: fs.existsSync across JS runtimes
+date: 17 September 2024
+---
+
+## Setup
+
+```
+$ uname -a
+Linux divy 6.10.6-arch1-1 #1 SMP PREEMPT_DYNAMIC Mon, 19 Aug 2024 17:02:39 +0000 x86_64 GNU/Linux
+```
+
+| Runtime | Version |
+| ------- | ------- |
+| Node.js | 22.8.0  |
+| Deno    | 2.0.0   |
+| Bun     | 1.1.27  |
+
+## Benchmark
+
+`create-react-app`

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2024-09-17" />
+  <title>fs.existsSync across JS runtimes</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="style.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">fs.existsSync across JS runtimes</h1>
+<p class="date">17 September 2024</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#setup" id="toc-setup">Setup</a></li>
+<li><a href="#benchmark" id="toc-benchmark">Benchmark</a></li>
+</ul>
+</nav>
+<h2 id="setup">Setup</h2>
+<pre><code>$ uname -a
+Linux divy 6.10.6-arch1-1 #1 SMP PREEMPT_DYNAMIC Mon, 19 Aug 2024 17:02:39 +0000 x86_64 GNU/Linux</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Runtime</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Node.js</td>
+<td>22.8.0</td>
+</tr>
+<tr class="even">
+<td>Deno</td>
+<td>2.0.0</td>
+</tr>
+<tr class="odd">
+<td>Bun</td>
+<td>1.1.27</td>
+</tr>
+</tbody>
+</table>
+<h2 id="benchmark">Benchmark</h2>
+<p><code>create-react-app</code></p>
+</body>
+</html>

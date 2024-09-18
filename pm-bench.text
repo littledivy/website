@@ -13,7 +13,7 @@ Linux divy 6.10.6-arch1-1 #1 SMP PREEMPT_DYNAMIC Mon, 19 Aug 2024 17:02:39 +0000
 | Runtime | Version |
 | ------- | ------- |
 | Node.js | 22.8.0  |
-| Deno    | 2.0.0   |
+| Deno    | 2.0.0-rc.2   |
 | Bun     | 1.1.27  |
 | Npm     | 10.7.0  |
 | Yarn    | 1.22.22 |
