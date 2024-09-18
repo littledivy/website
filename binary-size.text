@@ -1,0 +1,59 @@
+---
+title: Single executable sizes of JavaScript runtimes
+date: 18 September 2024
+---
+
+## Setup
+
+```
+$ uname -a
+Linux divy 6.10.6-arch1-1 #1 SMP PREEMPT_DYNAMIC Mon, 19 Aug 2024 17:02:39 +0000 x86_64 GNU/Linux
+```
+
+| Runtime | Version |
+| ------- | ------- |
+| Node.js | 22.8.0  |
+| Deno    | 2.0.0.rc-2 |
+| Bun     | 1.1.27  |
+
+## Benchmark
+
+We'll keep it simple just to get the baseline size.
+
+```js
+// hello.js
+console.log("Hello World");
+```
+
+Deno:
+```
+$ deno compile hello.js
+```
+
+Bun:
+```
+$ bun bundle --compile hello.js
+```
+
+Node:
+```
+$ node hello.js
+
+$ echo '{ "main": "hello.js", "output": "sea-prep.blob" }' > sea-config.json
+
+$ node --experimental-sea-config sea-config.json 
+
+$ npx postject hello NODE_SEA_BLOB sea-prep.blob \
+    --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 
+```
+
+## Results
+
+![](./assets/binary-sizes.png)
+
+| Runtime | Binary size |
+| ------- | ------- |
+| Deno    | 80 MB   |
+| Node.js | 107 MB  |
+| Bun     | 93 MB   |
+

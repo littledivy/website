@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2024-09-18" />
+  <title>Single executable sizes of JavaScript runtimes</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; } /* Alert */
+    code span.an { color: #008000; } /* Annotation */
+    code span.at { } /* Attribute */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #0000ff; } /* ControlFlow */
+    code span.ch { color: #008080; } /* Char */
+    code span.cn { } /* Constant */
+    code span.co { color: #008000; } /* Comment */
+    code span.cv { color: #008000; } /* CommentVar */
+    code span.do { color: #008000; } /* Documentation */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.im { } /* Import */
+    code span.in { color: #008000; } /* Information */
+    code span.kw { color: #0000ff; } /* Keyword */
+    code span.op { } /* Operator */
+    code span.ot { color: #ff4000; } /* Other */
+    code span.pp { color: #ff4000; } /* Preprocessor */
+    code span.sc { color: #008080; } /* SpecialChar */
+    code span.ss { color: #008080; } /* SpecialString */
+    code span.st { color: #008080; } /* String */
+    code span.va { } /* Variable */
+    code span.vs { color: #008080; } /* VerbatimString */
+    code span.wa { color: #008000; font-weight: bold; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="style.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Single executable sizes of JavaScript runtimes</h1>
+<p class="date">18 September 2024</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#setup" id="toc-setup">Setup</a></li>
+<li><a href="#benchmark" id="toc-benchmark">Benchmark</a></li>
+<li><a href="#results" id="toc-results">Results</a></li>
+</ul>
+</nav>
+<h2 id="setup">Setup</h2>
+<pre><code>$ uname -a
+Linux divy 6.10.6-arch1-1 #1 SMP PREEMPT_DYNAMIC Mon, 19 Aug 2024 17:02:39 +0000 x86_64 GNU/Linux</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Runtime</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Node.js</td>
+<td>22.8.0</td>
+</tr>
+<tr class="even">
+<td>Deno</td>
+<td>2.0.0.rc-2</td>
+</tr>
+<tr class="odd">
+<td>Bun</td>
+<td>1.1.27</td>
+</tr>
+</tbody>
+</table>
+<h2 id="benchmark">Benchmark</h2>
+<p>We’ll keep it simple just to get the baseline size.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// hello.js</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">&quot;Hello World&quot;</span>)<span class="op">;</span></span></code></pre></div>
+<p>Deno:</p>
+<pre><code>$ deno compile hello.js</code></pre>
+<p>Bun:</p>
+<pre><code>$ bun bundle --compile hello.js</code></pre>
+<p>Node:</p>
+<pre><code>$ node hello.js
+
+$ echo &#39;{ &quot;main&quot;: &quot;hello.js&quot;, &quot;output&quot;: &quot;sea-prep.blob&quot; }&#39; &gt; sea-config.json
+
+$ node --experimental-sea-config sea-config.json 
+
+$ npx postject hello NODE_SEA_BLOB sea-prep.blob \
+    --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 </code></pre>
+<h2 id="results">Results</h2>
+<p><img src="./assets/binary-sizes.png" /></p>
+<table>
+<thead>
+<tr class="header">
+<th>Runtime</th>
+<th>Binary size</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Deno</td>
+<td>80 MB</td>
+</tr>
+<tr class="even">
+<td>Node.js</td>
+<td>107 MB</td>
+</tr>
+<tr class="odd">
+<td>Bun</td>
+<td>93 MB</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
