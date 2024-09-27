@@ -11,14 +11,23 @@ body {
   font-family: "Space Mono", monospace;
   font-weight: 400;
   font-style: normal;
+  font-size: 1.1em;
   color: #333;
 }
 pre {
   color: #1111111;
   padding: 0.5em;
+  border: 1px solid #ccc;
+  background-color: #f8f8f8;
+  border-radius: 0.5em;
 }
-code {
-  font-family: monospace;
+blockquote {
+  padding: 0.1em;
+  padding-left: 1em;
+  margin-left: 0;
+  border-left: 0.5em solid #ccc;
+  background-color: #f8f8f8;
+  border-radius: 0.5em;
 }
 h1 a, h2 a, h3 a, h4 a, h5 a {
   text-decoration: none;
@@ -75,6 +84,8 @@ dd p {
 
 body img {
   max-width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
 }
 
 #footer {
