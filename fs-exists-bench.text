@@ -1,0 +1,48 @@
+---
+title: fs.existsSync across JS runtimes
+date: 18 September 2024
+---
+
+## Setup
+
+```
+$ uname -a
+Linux divy 6.10.6-arch1-1 #1 SMP PREEMPT_DYNAMIC Mon, 19 Aug 2024 17:02:39 +0000 x86_64 GNU/Linux
+```
+
+| Runtime | Version |
+| ------- | ------- |
+| Node.js | 22.8.0  |
+| Deno    | 2.0.0-rc.2  |
+| Bun     | 1.1.27  |
+
+## Benchmark
+
+```js
+// bench.mjs
+import { existsSync } from "node:fs";
+
+const start = performance.now();
+for (let i = 0; i < 1e7; i++) {
+  existsSync("bench.mjs");
+}
+
+console.log(`existsSync: ${performance.now() - start}ms`);
+```
+
+## Results
+
+![](./assets/fs-exists-bench.png)
+
+```
+$ deno run -A bench.mjs
+existsSync: 6312.76045ms
+
+$ bun bench.mjs
+existsSync: 6562.88671ms
+
+$ node bench.mjs
+existsSync: 7740.064653ms
+```
+
+---
