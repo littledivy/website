@@ -47,6 +47,7 @@
     .content {
       margin-top: 4rem;
       margin-bottom: 4rem;
+      z-index: 999;
     }
     header {
       margin: 0 auto 3rem;
@@ -60,6 +61,14 @@
     }
     li {
       margin-bottom: 0.09rem;
+    }
+    .makka-pakka {
+      border-radius: 0.5rem;
+      position: absolute;
+      top: 4em;
+      right: 20em;
+      z-index: 1;
+      height: 20%;
     }
     [data-tooltip]:hover::after {
       display: block;
@@ -75,6 +84,11 @@
     }
   </style>
   <body>
+    <img
+      src="assets/makka-pakka-yes.gif"
+      alt="Makka pakka saying hello"
+      class="makka-pakka"
+    />
     <div class="flex content">
       <header>
         <p>
