@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Divy Srivastava" />
+  <meta name="dcterms.date" content="2024-08-19" />
+  <title>Deno 2 internals</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; } /* Alert */
+    code span.an { color: #008000; } /* Annotation */
+    code span.at { } /* Attribute */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #0000ff; } /* ControlFlow */
+    code span.ch { color: #008080; } /* Char */
+    code span.cn { } /* Constant */
+    code span.co { color: #008000; } /* Comment */
+    code span.cv { color: #008000; } /* CommentVar */
+    code span.do { color: #008000; } /* Documentation */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.im { } /* Import */
+    code span.in { color: #008000; } /* Information */
+    code span.kw { color: #0000ff; } /* Keyword */
+    code span.op { } /* Operator */
+    code span.ot { color: #ff4000; } /* Other */
+    code span.pp { color: #ff4000; } /* Preprocessor */
+    code span.sc { color: #008080; } /* SpecialChar */
+    code span.ss { color: #008080; } /* SpecialString */
+    code span.st { color: #008080; } /* String */
+    code span.va { } /* Variable */
+    code span.vs { color: #008080; } /* VerbatimString */
+    code span.wa { color: #008000; font-weight: bold; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="style.css" />
+  <script src='https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js'></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Deno 2 internals</h1>
+<p class="author">Divy Srivastava</p>
+<p class="date">19 August 2024</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#description" id="toc-description">Description</a></li>
+<li><a href="#deno-2.0" id="toc-deno-2.0">Deno 2.0</a></li>
+<li><a href="#cli-architecture" id="toc-cli-architecture">CLI
+architecture</a></li>
+<li><a href="#build-system" id="toc-build-system">Build system</a>
+<ul>
+<li><a href="#development-tips" id="toc-development-tips">Development
+tips</a></li>
+</ul></li>
+<li><a href="#typescript" id="toc-typescript">TypeScript</a></li>
+<li><a href="#v8-snapshots" id="toc-v8-snapshots">V8 Snapshots</a></li>
+<li><a href="#external-references" id="toc-external-references">External
+References</a></li>
+<li><a href="#event-loop" id="toc-event-loop">Event loop</a>
+<ul>
+<li><a href="#jsruntimepoll_event_loop"
+id="toc-jsruntimepoll_event_loop"><code>JsRuntime::poll_event_loop</code></a></li>
+<li><a href="#spawn_blocking"
+id="toc-spawn_blocking"><code>spawn_blocking</code></a></li>
+</ul></li>
+<li><a href="#ops" id="toc-ops">Ops</a></li>
+<li><a href="#resources" id="toc-resources">Resources</a>
+<ul>
+<li><a href="#cppgc" id="toc-cppgc">Cppgc</a></li>
+</ul></li>
+<li><a href="#permissions" id="toc-permissions">Permissions</a></li>
+<li><a href="#built-ins" id="toc-built-ins">Built-ins</a></li>
+<li><a href="#node.js-compatibility"
+id="toc-node.js-compatibility">Node.js compatibility</a>
+<ul>
+<li><a href="#node-api" id="toc-node-api">Node API</a></li>
+<li><a href="#http" id="toc-http">HTTP</a></li>
+<li><a href="#ffi" id="toc-ffi">FFI</a></li>
+<li><a href="#websockets" id="toc-websockets">WebSockets</a></li>
+</ul></li>
+<li><a href="#tooling" id="toc-tooling">Tooling</a>
+<ul>
+<li><a href="#testing" id="toc-testing">Testing</a></li>
+<li><a href="#formatting" id="toc-formatting">Formatting</a></li>
+<li><a href="#linting" id="toc-linting">Linting</a></li>
+<li><a href="#standalone-compiler"
+id="toc-standalone-compiler">Standalone compiler</a></li>
+<li><a href="#debugging" id="toc-debugging">Debugging</a></li>
+<li><a href="#documentation-generator"
+id="toc-documentation-generator">Documentation generator</a></li>
+</ul></li>
+</ul>
+</nav>
+<h2 id="description">Description</h2>
+<p>This document and describes the internals of Deno 2. It is intended
+for developers who are interested in contributing to Deno or
+understanding how it works.</p>
+<p>Deno is one of the largest open-source Rust projects with ~1k
+contributors and 15 active contributors.</p>
+<p>Disclaimer: This is a living document and may not be up-to-date.</p>
+<h2 id="deno-2.0">Deno 2.0</h2>
+<p>Deno 2 is set to release in September 2024. There have been many
+deprecations and release candidates leading up to this release.</p>
+<h2 id="cli-architecture">CLI architecture</h2>
+<img src="5778c83d415a9070aa6b9c5548b09c0d46fa789d.svg" />
+<p>This is a high-level diagram of the Deno CLI. It is missing some
+details (registry, resolvers, permissions, etc) but gives a basic idea
+of how the CLI is structured.</p>
+<h2 id="build-system">Build system</h2>
+<p>Deno uses the standard cargo build system. It has two executable
+entrypoints in <code>cli/main.rs</code> and
+<code>cli/mainrt.rs</code>.</p>
+<p>Building is as simple as:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/denoland/deno <span class="at">--recurse-submodules</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> deno</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> build</span></code></pre></div>
+<p>A few cruical things happen during the build process:</p>
+<ul>
+<li>transpile TypeScript built-ins</li>
+<li>code generation for async Rust ops</li>
+<li>generate <a href="#v8-snapshots">V8 snapshots</a> for tsc and
+built-ins</li>
+<li>linking with prebuilt v8 and setting up node-api symbols</li>
+</ul>
+<h3 id="development-tips">Development tips</h3>
+<ol type="1">
+<li>Save linking time by building only the deno binary:</li>
+</ol>
+<pre><code>cargo build -p deno --bin deno</code></pre>
+<ol start="2" type="1">
+<li>Running unit tests without rebuilding:</li>
+</ol>
+<pre><code>target/debug/deno test -A --config tests/config/deno.json tests/unit/webcrypto_test.ts --filter &quot;rsa keygen&quot;</code></pre>
+<ol start="3" type="1">
+<li>Hot-reload for builtin JavaScript code:</li>
+</ol>
+<pre><code>cargo build -p deno --bin deno --features hmr</code></pre>
+<p>You don’t have to rebuild Deno when making changes to the builtin
+JS/TS source.</p>
+<ol start="4" type="1">
+<li>Hot-reload extension crates with <code>cargo-plonk</code>:</li>
+</ol>
+<pre><code>cargo install cargo-plonk</code></pre>
+<p>TODO: cargo-plonk</p>
+<h2 id="typescript">TypeScript</h2>
+<p>Deno has several ways to handling TypeScript code depending on the
+context. It uses swc for type-stripping and bundling and the TypeScript
+compiler (tsc) for LSP &amp; type-checking.</p>
+<p>tsc is written in JS and runs in a seperate V8 isolate with its own
+custom snapshot. <a
+href="https://github.com/denoland/deno/tree/0cb00a6e89d83d4e16e6616f7af8819bd894b0da/cli/tsc"><code>cli/tsc/</code></a>
+contains the code for the tsc bindings.</p>
+<p><code>00_typescript.js</code> is the bundled source of the official
+TypeScript compiler. <code>01_main_compiler.js</code> is the entrypoint
+for exeucting the compiler.</p>
+<p>A seperate custom V8 snapshot is created during build time for these
+sources.</p>
+<h2 id="v8-snapshots">V8 Snapshots</h2>
+<p>Most Deno built-ins and Web APIs are written in JavaScript and
+dispatch to Rust for the actual operation via the “op” system. Because
+of this there is a lot of JavaScript that needs to executed before user
+code runs. To avoid parsing and compiling this JavaScript on every
+startup, Deno leverages V8 snapshots to preprocess these builtins into a
+native format that can be quickly loaded into V8.</p>
+<p>The build script is responsible for generating JavaScript snapshots
+for built-ins and the TypeScript compiler.</p>
+<p>TODO: List the contexts per snapshot. Index Context 0 Vm 1 x</p>
+<h2 id="external-references">External References</h2>
+<h2 id="event-loop">Event loop</h2>
+<p>Deno uses Tokio for its event loop. Tokio is an asynchronous runtime
+for Rust that provides I/O operations, task scheduling and
+message-passing primitives. Deno uses a single-threaded Tokio runtime
+but I/O tasks maybe also be spawned on a threadpool.</p>
+<p>The event loop integrates with V8’s microtask queue to run JavaScript
+microtasks and drive pending promises to completion.</p>
+<p>Async ops are scheduled on the event loop and provide a way to run
+Rust futures and resolve associated JavaScript promises. This is how
+most of the I/O APIs like <code>Deno.readFile</code> are
+implemented.</p>
+<h3
+id="jsruntimepoll_event_loop"><code>JsRuntime::poll_event_loop</code></h3>
+<p>This drives Deno’s event loop. The code for
+<code>poll_event_loop</code> is pretty self-explanatory if you’re
+familiar with Rust futures and should make integration with V8’s
+microtask queue clearer.</p>
+<p>Let’s take a look at the things that happen: TODO.</p>
+<h3 id="spawn_blocking"><code>spawn_blocking</code></h3>
+<p><code>tokio::task::spawn_blocking</code> may be used when a CPU-bound
+task if its too expensive or may end up blocking the main thread. The
+task is spawned on Tokio’s threadpool. It’s used extensively in Deno for
+WebCrypto computations and asynchronous file I/O.</p>
+<p>Perf tip: Sometimes it’s better to avoid <code>spawn_blocking</code>
+for CPU bound tasks when either the task is too small or the overhead of
+spawning a new thread is too high.</p>
+<p>Deadlocks: It is possible to deadlock the event loop when the
+threadpool is saturated and tasks depend on each other. It is not common
+but currently <code>Deno.flock</code> suffers from this issue.</p>
+<h2 id="ops">Ops</h2>
+<p>“ops” are the way Deno exposes Rust functionality to JavaScript. They
+are the bridge between the JavaScript runtime and the Rust runtime.</p>
+<p>Ops are analogous to syscalls in a operating system. They are used
+for I/O, networking, file system access, etc.</p>
+<p>A radial tree of all ops in Deno (there are about ~840 of them):</p>
+<p><img src="./assets/ops-radial.svg" /></p>
+<h2 id="resources">Resources</h2>
+<p>Rust allocations referenced by JavaScript code are referred to as
+“Resources”. Deno has 2 types of resources: Manual and
+GarbageCollected.</p>
+<h3 id="cppgc">Cppgc</h3>
+<h2 id="permissions">Permissions</h2>
+<p>Each op is responsible for checking permissions. deno_permission
+crate.</p>
+<h2 id="built-ins">Built-ins</h2>
+<h2 id="node.js-compatibility">Node.js compatibility</h2>
+<h3 id="node-api">Node API</h3>
+<h3 id="http">HTTP</h3>
+<h3 id="ffi">FFI</h3>
+<p>turbocall jit with dynasmrt</p>
+<h3 id="websockets">WebSockets</h3>
+<p>fastwebsockets</p>
+<h2 id="tooling">Tooling</h2>
+<h3 id="testing">Testing</h3>
+<h3 id="formatting">Formatting</h3>
+<h3 id="linting">Linting</h3>
+<h3 id="standalone-compiler">Standalone compiler</h3>
+<h3 id="debugging">Debugging</h3>
+<h3 id="documentation-generator">Documentation generator</h3>
+<script>
+panzoom(document.getElementsByTagName('img')[1])
+</script>
+</body>
+</html>
