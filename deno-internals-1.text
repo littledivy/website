@@ -1,0 +1,207 @@
+---
+title: Deno 2 internals
+author: Divy Srivastava
+date: 19 August 2024
+header-includes: <script src='https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js'></script>
+---
+
+## Description
+
+This document and describes the internals of Deno 2. It is intended for developers who are interested in contributing to Deno or understanding how it works.
+
+Deno is one of the largest open-source Rust projects with ~1k contributors and 15 active contributors.
+
+Disclaimer: This is a living document and may not be up-to-date.
+
+## Deno 2.0
+
+Deno 2 is set to release in September 2024. There have been many deprecations and release candidates leading up to this release.
+
+## CLI architecture
+
+``` {.dot}
+strict digraph {
+    deno -> runtime
+    denort -> deno_runtime
+    deno -> tools
+    tools -> bundle -> deno_graph
+    
+    tools -> deno_lint
+    tools -> deno_doc
+    tools -> dprint
+    
+    runtime -> deno_runtime
+
+    runtime -> deno_runtime -> deno_graph -> swc
+    deno -> runtime
+    
+    deno_lint -> deno_ast -> swc
+    dprint -> swc
+    eszip -> deno_graph
+    deno_doc -> deno_graph
+    deno_graph -> deno_ast
+    deno -> denort -> sui
+    denort -> eszip
+    
+    tsc -> deno_runtime
+    deno -> lsp -> tsc
+    
+    deno_runtime -> deno_core
+    
+    deno_core -> tokio
+    deno -> tokio
+    
+    deno_core -> rusty_v8
+    rusty_v8 -> v8
+}
+```
+
+This is a high-level diagram of the Deno CLI. It is missing some details (registry, resolvers, permissions, etc) but gives a basic idea of how the CLI is structured.
+
+## Build system
+
+Deno uses the standard cargo build system. It has two executable entrypoints in `cli/main.rs` and `cli/mainrt.rs`.
+
+Building is as simple as:
+```sh
+git clone https://github.com/denoland/deno --recurse-submodules
+cd deno
+
+cargo build
+```
+
+A few cruical things happen during the build process:
+
+- transpile TypeScript built-ins
+- code generation for async Rust ops
+- generate [V8 snapshots](#v8-snapshots) for tsc and built-ins
+- linking with prebuilt v8 and setting up node-api symbols
+
+### Development tips
+
+1. Save linking time by building only the deno binary:
+```
+cargo build -p deno --bin deno
+```
+
+2. Running unit tests without rebuilding:
+```
+target/debug/deno test -A --config tests/config/deno.json tests/unit/webcrypto_test.ts --filter "rsa keygen"
+```
+
+3. Hot-reload for builtin JavaScript code:
+```
+cargo build -p deno --bin deno --features hmr
+```
+
+You don't have to rebuild Deno when making changes to the builtin JS/TS source.
+
+4. Hot-reload extension crates with `cargo-plonk`:
+
+```
+cargo install cargo-plonk
+```
+
+TODO: cargo-plonk
+
+## TypeScript
+
+Deno has several ways to handling TypeScript code depending on the context. It uses swc for type-stripping and bundling and the TypeScript compiler (tsc) for LSP & type-checking.
+
+tsc is written in JS and runs in a seperate V8 isolate with its own custom snapshot. [`cli/tsc/`](https://github.com/denoland/deno/tree/0cb00a6e89d83d4e16e6616f7af8819bd894b0da/cli/tsc)
+ contains the code for the tsc bindings.
+
+`00_typescript.js` is the bundled source of the official TypeScript compiler. `01_main_compiler.js` is the entrypoint for exeucting the compiler.
+
+A seperate custom V8 snapshot is created during build time for these sources.
+
+## V8 Snapshots
+
+Most Deno built-ins and Web APIs are written in JavaScript and dispatch to Rust for the actual operation via the "op" system. Because of this there is a lot of JavaScript that needs to executed before user code runs. To avoid parsing and compiling this JavaScript on every startup, Deno leverages V8 snapshots to preprocess these builtins into a native format that can be quickly loaded into V8.
+
+The build script is responsible for generating JavaScript snapshots for built-ins and the TypeScript compiler.
+
+TODO: List the contexts per snapshot.
+Index Context
+0     Vm
+1     x
+
+## External References
+
+## Event loop
+
+Deno uses Tokio for its event loop. Tokio is an asynchronous runtime for Rust that provides I/O operations, task scheduling and message-passing primitives. Deno uses a single-threaded Tokio runtime but I/O tasks maybe also be spawned on a threadpool.
+
+The event loop integrates with V8's microtask queue to run JavaScript microtasks and drive pending promises to completion.
+
+Async ops are scheduled on the event loop and provide a way to run Rust futures and resolve associated JavaScript promises. This is how most of the I/O APIs like `Deno.readFile` are implemented.
+
+### `JsRuntime::poll_event_loop`
+
+This drives Deno's event loop. The code for `poll_event_loop` is pretty self-explanatory if you're familiar with Rust futures and should make integration with V8's microtask queue clearer.
+
+Let's take a look at the things that happen: TODO.
+
+### `spawn_blocking`
+
+`tokio::task::spawn_blocking` may be used when a CPU-bound task if its too expensive or may end up blocking the main thread. The task is spawned on Tokio's threadpool. It's used extensively in Deno for WebCrypto computations and asynchronous file I/O.
+
+Perf tip: Sometimes it's better to avoid `spawn_blocking` for CPU bound tasks when either the task is too small or the overhead of spawning a new thread is too high.
+
+Deadlocks: It is possible to deadlock the event loop when the threadpool is saturated and tasks depend on each other. It is not common but currently `Deno.flock` suffers from this issue.
+
+## Ops
+
+"ops" are the way Deno exposes Rust functionality to JavaScript. They are the bridge between the JavaScript runtime and the Rust runtime. 
+
+Ops are analogous to syscalls in a operating system. They are used for I/O, networking, file system access, etc.
+
+A radial tree of all ops in Deno (there are about ~840 of them):
+
+![](./assets/ops-radial.svg)
+
+## Resources
+
+Rust allocations referenced by JavaScript code are referred to as "Resources". Deno has 2 types of resources: Manual and GarbageCollected.
+
+### Cppgc
+
+## Permissions
+
+Each op is responsible for checking permissions. deno_permission crate. 
+
+## Built-ins
+
+## Node.js compatibility
+
+### Node API
+
+### HTTP
+
+### FFI
+
+turbocall jit with dynasmrt
+
+### WebSockets
+
+fastwebsockets
+
+## Tooling
+
+### Testing
+
+### Formatting
+
+### Linting
+
+### Standalone compiler
+
+### Debugging
+
+### Documentation generator
+
+
+<script>
+panzoom(document.getElementsByTagName('img')[1])
+</script>
+
