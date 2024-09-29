@@ -7,7 +7,7 @@ header-includes: <script src='https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.j
 
 ## Description
 
-This document and describes the internals of Deno 2. It is intended for developers who are interested in contributing to Deno or understanding how it works.
+This document describes the internals of Deno 2. This is intended to be a digestable doc for developers who are interested in contributing to Deno or just people who want to understand how it works.
 
 Deno is one of the largest open-source Rust projects with ~1k contributors and 15 active contributors.
 
@@ -156,35 +156,163 @@ Deadlocks: It is possible to deadlock the event loop when the threadpool is satu
 
 Ops are analogous to syscalls in a operating system. They are used for I/O, networking, file system access, etc.
 
-A radial tree of all ops in Deno (there are about ~840 of them):
+Here's a radial tree of all ops in Deno (there are about ~840 of them):
 
 ![](./assets/ops-radial.svg)
 
 ## Resources
 
-Rust allocations referenced by JavaScript code are referred to as "Resources". Deno has 2 types of resources: Manual and GarbageCollected.
+Resources are Rust-allocated objects that are referenced by JavaScript code. Think of them as file descriptors. 
+Resources may or may not correspond to a real operating system file descriptor, they may store arbitrary data for stateful operations or I/O handles.
+
+There are 2 categories of resources in Deno.
+
+### `deno_core::Resource`
+
+JS integers that are allocated by the privileged side of Deno which refer to various rust objects that need
+to be persisted between various ops. For example, network sockets are resources.
+
+A resource implements a `read`, `write` and `close` method.
+
+### `deno_core::GarbageCollected`
+
+Typically resources must be explicitly closed by the user. However, in some cases, it is desirable to have resources that are automatically closed when they are no longer referenced by JavaScript code. This is where `GarbageCollected` resources come in.
+
+`GarbageCollected` resources are automatically de-allocated when the JavaScript object that references them is garbage collected.
 
 ### Cppgc
 
+Cppgc (Oilpan) is a tracing C++ garbage collector hosted through V8. It is used to manage the lifetimes of `GarbageCollected` resources.
+rusty_v8's `cppgc` module provides a Rust interface to Cppgc.
+
 ## Permissions
 
-Each op is responsible for checking permissions. deno_permission crate. 
+Deno has a fine-grained permission system that allows users to control what operations a script can perform. Permissions are requested by the script and granted by the user.
+
+Almost all of permission checks happen in the ops itself. An op that does reads from a network resource is responsible for checking the `net` permission.
+
+> Tip: If an op creates a resource that will be required for future ops, a one-time permission check during creation is usually sufficient.
+
+`deno_permission` crate is the home for all permission related code that manages permission state, parsing allowlists, user prompts, and checks.
+
+There are 2 ways to do permission checks in an op:
+
+1. Perform a direct check using `PermissionsContainer` (recommended).
+
+Much like any other state, permission state are stored in the `OpState` with type `deno_permission::PermissionsContainer`.
+
+```rust
+state
+  .borrow_mut::<PermissionsContainer>()
+  .check_read(path, "Deno.readFile")?;
+```
+
+2. Use a custom trait that is passed on to the op when extension is loaded (old way).
+
+```rust
+pub trait NetPermission {
+  fn allow_net(&mut self, url: &url::Url) -> bool;
+}
+
+#[op]
+pub fn fetch_url<P>(
+  state: &mut OpState,
+  url: String,
+) where P: NetPermission + 'static
+{
+  state.borrow_mut::<P>().allow_net(&url)?;
+  // ...
+}
+```
+
+This may be desirable when you want to give other embedders the flexibility to change the permission check logic.
 
 ## Built-ins
 
+Front-facing built-in APIs in Deno are mostly written in JavaScript and TypeScript. Some of them resort to calling 
+Rust ops for part of their functionality.
+
+Code for built-ins is spread all over the codebase. It all comes together and exposed to the user at `runtime/js/90_deno_ns.js` and `runtime/js/global_scope_window.js`. As the names suggest, these are one of the last modules to be loaded and setup APIs for the global `Deno` namespace and global objects.
+
+Each extension crate usually numbers it's built-in JS modules prefixed with a incrementing numbers. The order of these numbers is important as it determines the order in which the built-ins are loaded.
+
+```sh
+$ ls ext/webgpu
+00_init.js
+01_webgpu.js
+02_surface.js
+...
+```
+
 ## Node.js compatibility
+
+A lot of effort has been put into making Deno compatible with Node.js runtime APIs. Located at `ext/node`, it is the largest extension crate in Deno 2.
 
 ### Node API
 
+Node-API (previously known as N-API) is the C API for building native addons for Node.js. It provides a stable ABI across different versions of Node.js. Deno implements this API to provide compatibility with Node.js native modules. 
+
+Symbols are defined using the `napi_sym` macro.
+
+```rust
+#[napi_sym::napi_sym]
+pub fn napi_get_boolean(
+  env: *mut Env,
+  value: bool,
+  result: *mut napi_value,
+) -> Result {
+  let _env: &mut Env = env.as_mut().ok_or(Error::InvalidArg)?;
+  // ...
+  Ok(())
+}
+```
+
+Symbol definition files are manually generated. It is a file containing the symbols that need to be put into the executable's dynamic symbol table at link-time. This is done using `/DEF:` on Windows, `-exported_symbol,_` on macOS and `--export-dynamic-symbol=` on Linux. 
+
+> Note: On ancient glibc systems, the `--export-dynamic-symbol` flag is not supported. In this case, all symbols are exported by default. This results in a larger binary size.
+
 ### HTTP
+
+`Deno.serve` is the primary HTTP API server in Deno. It is a high-level API built on top of multiple ops that handle accepting connections, reading requests, writing responses, etc.
+
+```typescript
+Deno.serve((request: Request) => {
+    return new Response("Hello World");
+});
+```
 
 ### FFI
 
-turbocall jit with dynasmrt
+`Deno.dlopen` is the API for loading shared libraries and calling symbols from them. It is heavily optimized for performance.
+
+```typescript
+const sdl2 = Deno.dlopen("libSDL2.so", {
+  "SDL_Init": {
+    "parameters": ["u32"],
+    "result": "i32",
+  },
+  "SDL_GetPlatform": {
+    "parameters": [],
+    "result": "pointer",
+  },
+  // ...
+});
+
+if (sdl2.symbols.SDL_Init(0) != 0) {
+  throw new Error("Failed to initialize SDL2");
+}
+```
+
+It depends on `libffi` for conversions and `dynasmrt` for generating trampoline to enable V8 fast API calls. This is esentially
+a specialized JIT compiler that generates efficient conversions from V8 fast call values to symbol parameters.
+
+![](./assets/turbocall-slide.png)
+
+I have a blog post on Turbocall JIT: https://littledivy.com/turbocall.html
 
 ### WebSockets
 
-fastwebsockets
+fastwebsockets is a fast RFC 6455 compliant WebSocket implementation in Rust. It powers `new WebSocket` (client) and `Deno.upgradeWebSocket` (server) APIs in Deno.
 
 ## Tooling
 
