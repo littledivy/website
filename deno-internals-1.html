@@ -107,6 +107,7 @@ tips</a></li>
 <li><a href="#v8-snapshots" id="toc-v8-snapshots">V8 Snapshots</a></li>
 <li><a href="#external-references" id="toc-external-references">External
 References</a></li>
+<li><a href="#code-cache" id="toc-code-cache">Code cache</a></li>
 <li><a href="#event-loop" id="toc-event-loop">Event loop</a>
 <ul>
 <li><a href="#jsruntimepoll_event_loop"
@@ -132,10 +133,13 @@ id="toc-node.js-compatibility">Node.js compatibility</a>
 <li><a href="#http" id="toc-http">HTTP</a></li>
 <li><a href="#ffi" id="toc-ffi">FFI</a></li>
 <li><a href="#websockets" id="toc-websockets">WebSockets</a></li>
+<li><a href="#webgpu" id="toc-webgpu">WebGPU</a></li>
+<li><a href="#workers" id="toc-workers">Workers</a></li>
 </ul></li>
 <li><a href="#tooling" id="toc-tooling">Tooling</a>
 <ul>
 <li><a href="#testing" id="toc-testing">Testing</a></li>
+<li><a href="#coverage" id="toc-coverage">Coverage</a></li>
 <li><a href="#formatting" id="toc-formatting">Formatting</a></li>
 <li><a href="#linting" id="toc-linting">Linting</a></li>
 <li><a href="#standalone-compiler"
@@ -143,7 +147,13 @@ id="toc-standalone-compiler">Standalone compiler</a></li>
 <li><a href="#debugging" id="toc-debugging">Debugging</a></li>
 <li><a href="#documentation-generator"
 id="toc-documentation-generator">Documentation generator</a></li>
+<li><a href="#lsp" id="toc-lsp">LSP</a></li>
+<li><a href="#jupyter" id="toc-jupyter">Jupyter</a></li>
 </ul></li>
+<li><a href="#inspector" id="toc-inspector">Inspector</a></li>
+<li><a href="#package-management" id="toc-package-management">Package
+management</a></li>
+<li><a href="#tests" id="toc-tests">Tests</a></li>
 </ul>
 </nav>
 <h2 id="description">Description</h2>
@@ -157,41 +167,7 @@ contributors and 15 active contributors.</p>
 <p>Deno 2 is set to release in September 2024. There have been many
 deprecations and release candidates leading up to this release.</p>
 <h2 id="cli-architecture">CLI architecture</h2>
-<div class="sourceCode" id="cb1"><pre
-class="sourceCode dot"><code class="sourceCode dot"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">strict</span> <span class="kw">digraph</span> <span class="ot">{</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">deno</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">runtime</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">denort</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">deno_runtime</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">deno</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">tools</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">tools</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">bundle</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">deno_graph</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">tools</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">deno_lint</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">tools</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">deno_doc</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">tools</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">dprint</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">runtime</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">deno_runtime</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">runtime</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">deno_runtime</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">deno_graph</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">swc</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">deno</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">runtime</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">deno_lint</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">deno_ast</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">swc</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">dprint</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">swc</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">eszip</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">deno_graph</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">deno_doc</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">deno_graph</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">deno_graph</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">deno_ast</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">deno</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">denort</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">sui</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">denort</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">eszip</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">tsc</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">deno_runtime</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">deno</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">lsp</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">tsc</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">deno_runtime</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">deno_core</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">deno_core</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">tokio</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">deno</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">tokio</span></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="co">    </span></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">deno_core</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">rusty_v8</span></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="co">    </span><span class="va">rusty_v8</span><span class="co"> </span><span class="ot">-&gt;</span><span class="co"> </span><span class="va">v8</span></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="ot">}</span></span></code></pre></div>
+<img src="acbf6532dedec16d53d3d0cb1b62d65525573f93.svg" />
 <p>This is a high-level diagram of the Deno CLI. It is missing some
 details (registry, resolvers, permissions, etc) but gives a basic idea
 of how the CLI is structured.</p>
@@ -200,10 +176,10 @@ of how the CLI is structured.</p>
 entrypoints in <code>cli/main.rs</code> and
 <code>cli/mainrt.rs</code>.</p>
 <p>Building is as simple as:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/denoland/deno <span class="at">--recurse-submodules</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> deno</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> build</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/denoland/deno <span class="at">--recurse-submodules</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> deno</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> build</span></code></pre></div>
 <p>A few cruical things happen during the build process:</p>
 <ul>
 <li>transpile TypeScript built-ins</li>
@@ -245,6 +221,7 @@ TypeScript compiler. <code>01_main_compiler.js</code> is the entrypoint
 for exeucting the compiler.</p>
 <p>A seperate custom V8 snapshot is created during build time for these
 sources.</p>
+<p>TODO: swc emit</p>
 <h2 id="v8-snapshots">V8 Snapshots</h2>
 <p>Most Deno built-ins and Web APIs are written in JavaScript and
 dispatch to Rust for the actual operation via the “op” system. Because
@@ -256,6 +233,7 @@ native format that can be quickly loaded into V8.</p>
 for built-ins and the TypeScript compiler.</p>
 <p>TODO: List the contexts per snapshot. Index Context 0 Vm 1 x</p>
 <h2 id="external-references">External References</h2>
+<h2 id="code-cache">Code cache</h2>
 <h2 id="event-loop">Event loop</h2>
 <p>Deno uses Tokio for its event loop. Tokio is an asynchronous runtime
 for Rust that provides I/O operations, task scheduling and
@@ -342,28 +320,28 @@ prompts, and checks.</p>
 <p>Much like any other state, permission state are stored in the
 <code>OpState</code> with type
 <code>deno_permission::PermissionsContainer</code>.</p>
-<div class="sourceCode" id="cb7"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>state</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="pp">borrow_mut::</span><span class="op">&lt;</span>PermissionsContainer<span class="op">&gt;</span>()</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>check_read(path<span class="op">,</span> <span class="st">&quot;Deno.readFile&quot;</span>)<span class="op">?;</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>state</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="pp">borrow_mut::</span><span class="op">&lt;</span>PermissionsContainer<span class="op">&gt;</span>()</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>check_read(path<span class="op">,</span> <span class="st">&quot;Deno.readFile&quot;</span>)<span class="op">?;</span></span></code></pre></div>
 <ol start="2" type="1">
 <li>Use a custom trait that is passed on to the op when extension is
 loaded (old way).</li>
 </ol>
-<div class="sourceCode" id="cb8"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">trait</span> NetPermission <span class="op">{</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">fn</span> allow_net(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> url<span class="op">:</span> <span class="op">&amp;</span><span class="pp">url::</span>Url) <span class="op">-&gt;</span> <span class="dt">bool</span><span class="op">;</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>op<span class="at">]</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">fn</span> fetch_url<span class="op">&lt;</span>P<span class="op">&gt;</span>(</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  state<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> OpState<span class="op">,</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  url<span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>) <span class="kw">where</span> P<span class="op">:</span> NetPermission <span class="op">+</span> <span class="ot">&#39;static</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  state<span class="op">.</span><span class="pp">borrow_mut::</span><span class="op">&lt;</span>P<span class="op">&gt;</span>()<span class="op">.</span>allow_net(<span class="op">&amp;</span>url)<span class="op">?;</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">trait</span> NetPermission <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">fn</span> allow_net(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> url<span class="op">:</span> <span class="op">&amp;</span><span class="pp">url::</span>Url) <span class="op">-&gt;</span> <span class="dt">bool</span><span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>op<span class="at">]</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">fn</span> fetch_url<span class="op">&lt;</span>P<span class="op">&gt;</span>(</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  state<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> OpState<span class="op">,</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  url<span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>) <span class="kw">where</span> P<span class="op">:</span> NetPermission <span class="op">+</span> <span class="ot">&#39;static</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  state<span class="op">.</span><span class="pp">borrow_mut::</span><span class="op">&lt;</span>P<span class="op">&gt;</span>()<span class="op">.</span>allow_net(<span class="op">&amp;</span>url)<span class="op">?;</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>This may be desirable when you want to give other embedders the
 flexibility to change the permission check logic.</p>
 <h2 id="built-ins">Built-ins</h2>
@@ -380,11 +358,11 @@ global <code>Deno</code> namespace and global objects.</p>
 prefixed with a incrementing numbers. The order of these numbers is
 important as it determines the order in which the built-ins are
 loaded.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ls ext/webgpu</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">00_init.js</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">01_webgpu.js</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="ex">02_surface.js</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">...</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ls ext/webgpu</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">00_init.js</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">01_webgpu.js</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="ex">02_surface.js</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="ex">...</span></span></code></pre></div>
 <h2 id="node.js-compatibility">Node.js compatibility</h2>
 <p>A lot of effort has been put into making Deno compatible with Node.js
 runtime APIs. Located at <code>ext/node</code>, it is the largest
@@ -395,17 +373,17 @@ addons for Node.js. It provides a stable ABI across different versions
 of Node.js. Deno implements this API to provide compatibility with
 Node.js native modules.</p>
 <p>Symbols are defined using the <code>napi_sym</code> macro.</p>
-<div class="sourceCode" id="cb10"><pre
-class="sourceCode rust"><code class="sourceCode rust"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span><span class="pp">napi_sym::</span>napi_sym<span class="at">]</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">fn</span> napi_get_boolean(</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  env<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> Env<span class="op">,</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  value<span class="op">:</span> <span class="dt">bool</span><span class="op">,</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  result<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> napi_value<span class="op">,</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="dt">Result</span> <span class="op">{</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> _env<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> Env <span class="op">=</span> env<span class="op">.</span>as_mut()<span class="op">.</span>ok_or(<span class="bu">Error</span><span class="pp">::</span>InvalidArg)<span class="op">?;</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="cn">Ok</span>(())</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span><span class="pp">napi_sym::</span>napi_sym<span class="at">]</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">fn</span> napi_get_boolean(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  env<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> Env<span class="op">,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  value<span class="op">:</span> <span class="dt">bool</span><span class="op">,</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  result<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> napi_value<span class="op">,</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="dt">Result</span> <span class="op">{</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> _env<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> Env <span class="op">=</span> env<span class="op">.</span>as_mut()<span class="op">.</span>ok_or(<span class="bu">Error</span><span class="pp">::</span>InvalidArg)<span class="op">?;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="cn">Ok</span>(())</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>Symbol definition files are manually generated. It is a file
 containing the symbols that need to be put into the executable’s dynamic
 symbol table at link-time. This is done using <code>/DEF:</code> on
@@ -421,29 +399,29 @@ binary size.</p>
 <p><code>Deno.serve</code> is the primary HTTP API server in Deno. It is
 a high-level API built on top of multiple ops that handle accepting
 connections, reading requests, writing responses, etc.</p>
-<div class="sourceCode" id="cb11"><pre
-class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>Deno<span class="op">.</span><span class="fu">serve</span>((request<span class="op">:</span> Request) <span class="kw">=&gt;</span> {</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">new</span> <span class="fu">Response</span>(<span class="st">&quot;Hello World&quot;</span>)<span class="op">;</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>Deno<span class="op">.</span><span class="fu">serve</span>((request<span class="op">:</span> Request) <span class="kw">=&gt;</span> {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">new</span> <span class="fu">Response</span>(<span class="st">&quot;Hello World&quot;</span>)<span class="op">;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
 <h3 id="ffi">FFI</h3>
 <p><code>Deno.dlopen</code> is the API for loading shared libraries and
 calling symbols from them. It is heavily optimized for performance.</p>
-<div class="sourceCode" id="cb12"><pre
-class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> sdl2 <span class="op">=</span> Deno<span class="op">.</span><span class="fu">dlopen</span>(<span class="st">&quot;libSDL2.so&quot;</span><span class="op">,</span> {</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;SDL_Init&quot;</span><span class="op">:</span> {</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;parameters&quot;</span><span class="op">:</span> [<span class="st">&quot;u32&quot;</span>]<span class="op">,</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;result&quot;</span><span class="op">:</span> <span class="st">&quot;i32&quot;</span><span class="op">,</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;SDL_GetPlatform&quot;</span><span class="op">:</span> {</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;parameters&quot;</span><span class="op">:</span> []<span class="op">,</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;result&quot;</span><span class="op">:</span> <span class="st">&quot;pointer&quot;</span><span class="op">,</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (sdl2<span class="op">.</span><span class="at">symbols</span><span class="op">.</span><span class="fu">SDL_Init</span>(<span class="dv">0</span>) <span class="op">!=</span> <span class="dv">0</span>) {</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">Error</span>(<span class="st">&quot;Failed to initialize SDL2&quot;</span>)<span class="op">;</span></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> sdl2 <span class="op">=</span> Deno<span class="op">.</span><span class="fu">dlopen</span>(<span class="st">&quot;libSDL2.so&quot;</span><span class="op">,</span> {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;SDL_Init&quot;</span><span class="op">:</span> {</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;parameters&quot;</span><span class="op">:</span> [<span class="st">&quot;u32&quot;</span>]<span class="op">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;result&quot;</span><span class="op">:</span> <span class="st">&quot;i32&quot;</span><span class="op">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;SDL_GetPlatform&quot;</span><span class="op">:</span> {</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;parameters&quot;</span><span class="op">:</span> []<span class="op">,</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;result&quot;</span><span class="op">:</span> <span class="st">&quot;pointer&quot;</span><span class="op">,</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (sdl2<span class="op">.</span><span class="at">symbols</span><span class="op">.</span><span class="fu">SDL_Init</span>(<span class="dv">0</span>) <span class="op">!=</span> <span class="dv">0</span>) {</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">Error</span>(<span class="st">&quot;Failed to initialize SDL2&quot;</span>)<span class="op">;</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>It depends on <code>libffi</code> for conversions and
 <code>dynasmrt</code> for generating trampoline to enable V8 fast API
 calls. This is esentially a specialized JIT compiler that generates
@@ -456,13 +434,26 @@ class="uri">https://littledivy.com/turbocall.html</a></p>
 <p>fastwebsockets is a fast RFC 6455 compliant WebSocket implementation
 in Rust. It powers <code>new WebSocket</code> (client) and
 <code>Deno.upgradeWebSocket</code> (server) APIs in Deno.</p>
+<h3 id="webgpu">WebGPU</h3>
+<h3 id="workers">Workers</h3>
 <h2 id="tooling">Tooling</h2>
 <h3 id="testing">Testing</h3>
+<h3 id="coverage">Coverage</h3>
 <h3 id="formatting">Formatting</h3>
+<p>dprint</p>
 <h3 id="linting">Linting</h3>
+<p>deno_lint</p>
 <h3 id="standalone-compiler">Standalone compiler</h3>
+<p>denort, sui, codesign</p>
 <h3 id="debugging">Debugging</h3>
 <h3 id="documentation-generator">Documentation generator</h3>
+<p>deno_doc</p>
+<h3 id="lsp">LSP</h3>
+<h3 id="jupyter">Jupyter</h3>
+<h2 id="inspector">Inspector</h2>
+<h2 id="package-management">Package management</h2>
+<h2 id="tests">Tests</h2>
+<p>unit, itest, unit_node, wpt</p>
 <script>
 panzoom(document.getElementsByTagName('img')[1])
 </script>

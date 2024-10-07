@@ -115,6 +115,8 @@ tsc is written in JS and runs in a seperate V8 isolate with its own custom snaps
 
 A seperate custom V8 snapshot is created during build time for these sources.
 
+TODO: swc emit
+
 ## V8 Snapshots
 
 Most Deno built-ins and Web APIs are written in JavaScript and dispatch to Rust for the actual operation via the "op" system. Because of this there is a lot of JavaScript that needs to executed before user code runs. To avoid parsing and compiling this JavaScript on every startup, Deno leverages V8 snapshots to preprocess these builtins into a native format that can be quickly loaded into V8.
@@ -127,6 +129,8 @@ Index Context
 1     x
 
 ## External References
+
+## Code cache
 
 ## Event loop
 
@@ -314,20 +318,45 @@ I have a blog post on Turbocall JIT: https://littledivy.com/turbocall.html
 
 fastwebsockets is a fast RFC 6455 compliant WebSocket implementation in Rust. It powers `new WebSocket` (client) and `Deno.upgradeWebSocket` (server) APIs in Deno.
 
+### WebGPU
+
+### Workers
+
 ## Tooling
 
 ### Testing
 
+### Coverage
+
 ### Formatting
+
+dprint
 
 ### Linting
 
+deno_lint
+
 ### Standalone compiler
+
+denort, sui, codesign
 
 ### Debugging
 
 ### Documentation generator
 
+deno_doc
+
+### LSP
+
+### Jupyter
+
+## Inspector
+
+## Package management
+
+## Tests
+
+unit, itest, unit_node, wpt
 
 <script>
 panzoom(document.getElementsByTagName('img')[1])
