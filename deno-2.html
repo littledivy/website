@@ -96,8 +96,6 @@
 <ul>
 <li><a href="#description" id="toc-description">Description</a></li>
 <li><a href="#deno-2.0" id="toc-deno-2.0">Deno 2.0</a></li>
-<li><a href="#cli-architecture" id="toc-cli-architecture">CLI
-architecture</a></li>
 <li><a href="#build-system" id="toc-build-system">Build system</a>
 <ul>
 <li><a href="#development-tips" id="toc-development-tips">Development
@@ -133,30 +131,13 @@ id="toc-node.js-compatibility">Node.js compatibility</a>
 <li><a href="#http" id="toc-http">HTTP</a></li>
 <li><a href="#ffi" id="toc-ffi">FFI</a></li>
 <li><a href="#websockets" id="toc-websockets">WebSockets</a></li>
-<li><a href="#webgpu" id="toc-webgpu">WebGPU</a></li>
-<li><a href="#workers" id="toc-workers">Workers</a></li>
 </ul></li>
-<li><a href="#tooling" id="toc-tooling">Tooling</a>
-<ul>
-<li><a href="#testing" id="toc-testing">Testing</a></li>
-<li><a href="#coverage" id="toc-coverage">Coverage</a></li>
-<li><a href="#formatting" id="toc-formatting">Formatting</a></li>
-<li><a href="#linting" id="toc-linting">Linting</a></li>
-<li><a href="#standalone-compiler"
-id="toc-standalone-compiler">Standalone compiler</a></li>
-<li><a href="#debugging" id="toc-debugging">Debugging</a></li>
-<li><a href="#documentation-generator"
-id="toc-documentation-generator">Documentation generator</a></li>
-<li><a href="#lsp" id="toc-lsp">LSP</a></li>
-<li><a href="#jupyter" id="toc-jupyter">Jupyter</a></li>
-</ul></li>
-<li><a href="#inspector" id="toc-inspector">Inspector</a></li>
-<li><a href="#package-management" id="toc-package-management">Package
-management</a></li>
-<li><a href="#tests" id="toc-tests">Tests</a></li>
 </ul>
 </nav>
 <h2 id="description">Description</h2>
+<blockquote>
+<p>Warning: Work in progress document.</p>
+</blockquote>
 <p>This document describes the internals of Deno 2. This is intended to
 be a digestable doc for developers who are interested in contributing to
 Deno or just people who want to understand how it works.</p>
@@ -164,13 +145,8 @@ Deno or just people who want to understand how it works.</p>
 contributors and 15 active contributors.</p>
 <p>Disclaimer: This is a living document and may not be up-to-date.</p>
 <h2 id="deno-2.0">Deno 2.0</h2>
-<p>Deno 2 is set to release in September 2024. There have been many
+<p>Deno 2 is set to release in October 2024. There have been many
 deprecations and release candidates leading up to this release.</p>
-<h2 id="cli-architecture">CLI architecture</h2>
-<img src="acbf6532dedec16d53d3d0cb1b62d65525573f93.svg" />
-<p>This is a high-level diagram of the Deno CLI. It is missing some
-details (registry, resolvers, permissions, etc) but gives a basic idea
-of how the CLI is structured.</p>
 <h2 id="build-system">Build system</h2>
 <p>Deno uses the standard cargo build system. It has two executable
 entrypoints in <code>cli/main.rs</code> and
@@ -231,8 +207,26 @@ startup, Deno leverages V8 snapshots to preprocess these builtins into a
 native format that can be quickly loaded into V8.</p>
 <p>The build script is responsible for generating JavaScript snapshots
 for built-ins and the TypeScript compiler.</p>
-<p>TODO: List the contexts per snapshot. Index Context 0 Vm 1 x</p>
+<table>
+<thead>
+<tr>
+<th>Index</th>
+<th>Context</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>VM_CONTEXT_INDEX</td>
+</tr>
+<tr>
+<td>1</td>
+<td>MAIN_CONTEXT</td>
+</tr>
+</tbody>
+</table>
 <h2 id="external-references">External References</h2>
+<p>Native functions and objects allocated during snapshot</p>
 <h2 id="code-cache">Code cache</h2>
 <h2 id="event-loop">Event loop</h2>
 <p>Deno uses Tokio for its event loop. Tokio is an asynchronous runtime
@@ -434,28 +428,5 @@ class="uri">https://littledivy.com/turbocall.html</a></p>
 <p>fastwebsockets is a fast RFC 6455 compliant WebSocket implementation
 in Rust. It powers <code>new WebSocket</code> (client) and
 <code>Deno.upgradeWebSocket</code> (server) APIs in Deno.</p>
-<h3 id="webgpu">WebGPU</h3>
-<h3 id="workers">Workers</h3>
-<h2 id="tooling">Tooling</h2>
-<h3 id="testing">Testing</h3>
-<h3 id="coverage">Coverage</h3>
-<h3 id="formatting">Formatting</h3>
-<p>dprint</p>
-<h3 id="linting">Linting</h3>
-<p>deno_lint</p>
-<h3 id="standalone-compiler">Standalone compiler</h3>
-<p>denort, sui, codesign</p>
-<h3 id="debugging">Debugging</h3>
-<h3 id="documentation-generator">Documentation generator</h3>
-<p>deno_doc</p>
-<h3 id="lsp">LSP</h3>
-<h3 id="jupyter">Jupyter</h3>
-<h2 id="inspector">Inspector</h2>
-<h2 id="package-management">Package management</h2>
-<h2 id="tests">Tests</h2>
-<p>unit, itest, unit_node, wpt</p>
-<script>
-panzoom(document.getElementsByTagName('img')[1])
-</script>
 </body>
 </html>
