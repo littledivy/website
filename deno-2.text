@@ -1,7 +1,7 @@
 ---
 title: Deno 2 internals
 author: Divy Srivastava
-date: 19 August 2024
+date: 9 October 2024
 header-includes: <script src='https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js'></script>
 ---
 
