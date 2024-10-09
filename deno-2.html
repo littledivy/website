@@ -84,7 +84,6 @@
     code span.wa { color: #008000; font-weight: bold; } /* Warning */
   </style>
   <link rel="stylesheet" href="style.css" />
-  <script src='https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js'></script>
 </head>
 <body>
 <header id="title-block-header">
@@ -105,7 +104,6 @@ tips</a></li>
 <li><a href="#v8-snapshots" id="toc-v8-snapshots">V8 Snapshots</a></li>
 <li><a href="#external-references" id="toc-external-references">External
 References</a></li>
-<li><a href="#code-cache" id="toc-code-cache">Code cache</a></li>
 <li><a href="#event-loop" id="toc-event-loop">Event loop</a>
 <ul>
 <li><a href="#jsruntimepoll_event_loop"
@@ -182,8 +180,14 @@ JS/TS source.</p>
 <ol start="4" type="1">
 <li>Hot-reload extension crates with <code>cargo-plonk</code>:</li>
 </ol>
-<pre><code>cargo install cargo-plonk</code></pre>
-<p>TODO: cargo-plonk</p>
+<pre><code>cargo install cargo-plonk
+
+# Start hot-reload for deno_webgpu
+cargo plonk run \
+  --package deno_webgpu \
+  --symbol init_ops_and_esm \
+  --bin deno \
+  --watch</code></pre>
 <h2 id="typescript">TypeScript</h2>
 <p>Deno has several ways to handling TypeScript code depending on the
 context. It uses swc for type-stripping and bundling and the TypeScript
@@ -197,7 +201,6 @@ TypeScript compiler. <code>01_main_compiler.js</code> is the entrypoint
 for exeucting the compiler.</p>
 <p>A seperate custom V8 snapshot is created during build time for these
 sources.</p>
-<p>TODO: swc emit</p>
 <h2 id="v8-snapshots">V8 Snapshots</h2>
 <p>Most Deno built-ins and Web APIs are written in JavaScript and
 dispatch to Rust for the actual operation via the “op” system. Because
@@ -226,8 +229,9 @@ for built-ins and the TypeScript compiler.</p>
 </tbody>
 </table>
 <h2 id="external-references">External References</h2>
-<p>Native functions and objects allocated during snapshot</p>
-<h2 id="code-cache">Code cache</h2>
+<p>Native functions and objects allocated during snapshot are stored in
+the external references table. This table is used to resolve references
+to external objects during snapshot deserialization.</p>
 <h2 id="event-loop">Event loop</h2>
 <p>Deno uses Tokio for its event loop. Tokio is an asynchronous runtime
 for Rust that provides I/O operations, task scheduling and
